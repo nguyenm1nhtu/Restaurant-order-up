@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Button } from '../ui/button';
 import useAdminStore from '../../store/useAdminStore';
 
 const AdminDashboard: React.FC = () => {
