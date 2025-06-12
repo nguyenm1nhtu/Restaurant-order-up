@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Badge } from '../ui/badge';
@@ -16,6 +17,7 @@ import {
 } from '../ui/table';
 
 const MenuItemManagement: React.FC = () => {
+  const navigate = useNavigate();
   const { menuItems, deleteMenuItem } = useAdminStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -36,6 +38,14 @@ const MenuItemManagement: React.FC = () => {
       setShowDeleteModal(false);
       setItemToDelete(null);
     }
+  };
+
+  const handleEditClick = (itemId: string) => {
+    navigate(`/admin/menu/edit/${itemId}`);
+  };
+
+  const handleAddNew = () => {
+    navigate('/admin/menu/add');
   };
 
   return (
@@ -78,7 +88,11 @@ const MenuItemManagement: React.FC = () => {
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <Button variant="ghost" size="sm">
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => handleEditClick(item.id)}
+                  >
                     <Pen className="h-4 w-4" />
                   </Button>
                 </TableCell>
@@ -106,7 +120,10 @@ const MenuItemManagement: React.FC = () => {
           <Button variant="ghost" size="sm">Next</Button>
         </div>
         
-        <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+        <Button 
+          className="bg-blue-600 hover:bg-blue-700 text-white"
+          onClick={handleAddNew}
+        >
           Thêm món ăn mới
         </Button>
       </div>

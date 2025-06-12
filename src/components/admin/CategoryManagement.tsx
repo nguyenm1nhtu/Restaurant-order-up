@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Badge } from '../ui/badge';
@@ -16,13 +17,14 @@ import {
 } from '../ui/table';
 
 const CategoryManagement: React.FC = () => {
+  const navigate = useNavigate();
   const { categories, deleteCategory } = useAdminStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState<string | null>(null);
 
   const filteredCategories = categories.filter(category =>
-    category.name.toLowerCase().includes(searchTerm.toLowerCase())
+    category.name.toLowerCase().includes(searchTerm.toLowerCase()) && category.status === 'active'
   );
 
   const handleDeleteClick = (categoryId: string) => {
@@ -36,6 +38,14 @@ const CategoryManagement: React.FC = () => {
       setShowDeleteModal(false);
       setCategoryToDelete(null);
     }
+  };
+
+  const handleEditClick = (categoryId: string) => {
+    navigate(`/admin/category/edit/${categoryId}`);
+  };
+
+  const handleAddNew = () => {
+    navigate('/admin/category/add');
   };
 
   return (
@@ -78,7 +88,11 @@ const CategoryManagement: React.FC = () => {
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <Button variant="ghost" size="sm">
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => handleEditClick(category.id)}
+                  >
                     <Pen className="h-4 w-4" />
                   </Button>
                 </TableCell>
@@ -106,7 +120,10 @@ const CategoryManagement: React.FC = () => {
           <Button variant="ghost" size="sm">Next</Button>
         </div>
         
-        <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+        <Button 
+          className="bg-blue-600 hover:bg-blue-700 text-white"
+          onClick={handleAddNew}
+        >
           Thêm danh mục mới
         </Button>
       </div>

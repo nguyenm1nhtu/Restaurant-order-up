@@ -23,6 +23,10 @@ const App = () => (
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/menu" element={<MenuManagement />} />
+          <Route path="/admin/category/add" element={<AddCategoryForm />} />
+          <Route path="/admin/category/edit/:id" element={<EditCategoryForm />} />
+          <Route path="/admin/menu/add" element={<AddMenuItemForm />} />
+          <Route path="/admin/menu/edit/:id" element={<EditMenuItemForm />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
