@@ -1,4 +1,3 @@
-// middlewares/auth.js
 const jwt = require("jsonwebtoken");
 
 const SECRET_KEY = "123456";
@@ -12,8 +11,8 @@ const verifyToken = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, SECRET_KEY);
-    req.user = decoded; // Gắn dữ liệu người dùng vào req để các route sau dùng
-    next(); // Cho phép đi tiếp
+    req.user = decoded;
+    next();
   } catch (err) {
     return res.status(403).json({ status: "error", message: "Token không hợp lệ" });
   }

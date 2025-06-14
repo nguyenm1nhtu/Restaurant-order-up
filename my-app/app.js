@@ -6,6 +6,8 @@ var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+var loginRouter = require('./routes/login');
+var bookingTableRouter = require('./routes/bookingTable');
 var khachHangRouter = require('./routes/khachhang');
 var menuRouter = require('./routes/menu');
 var recipeRouter = require('./routes/recipe')
@@ -24,16 +26,16 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use('/login', loginRouter);
+app.use('/bookingTable', bookingTableRouter);
 app.use('/khachhang', khachHangRouter);
 app.use('/menu', menuRouter);
 app.use('/recipe', recipeRouter);
 
-// catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
 });
 
-// error handler
 app.use(function(err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
