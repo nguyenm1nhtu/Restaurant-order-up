@@ -1,0 +1,6 @@
+.container {
+    margin-top: var(--header-height);
+    padding: 20px 180px 0;
+    position: relative;
+    background-color: #fff;
+}

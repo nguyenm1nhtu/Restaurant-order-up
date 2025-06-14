@@ -1,6 +1,10 @@
 @import 'tailwindcss';
 
 :root {
+    --primary-color: #bf1e2e;
+    --disabled-btn: #ccc;
+    --disabled-text-btn: #757575;
+    --header-height: 78px;
 }
 
 @layer base {
