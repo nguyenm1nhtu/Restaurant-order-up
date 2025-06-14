@@ -13,6 +13,7 @@ export default function Header() {
     const [loginOpen, setLoginOpen] = useState(false);
 
     const profileRef = useMouseLeaveDropdown(() => {
+        console.log('Mouse leave dropdown');
         setProfileDropdownOpen(false);
     });
 
@@ -20,6 +21,7 @@ export default function Header() {
         e.stopPropagation();
         console.log('Logout clicked');
         setLoggedIn(false);
+        setProfileDropdownOpen(false);
     };
 
     const handleLoginClick = () => {
@@ -34,6 +36,12 @@ export default function Header() {
         console.log('Form submitted:', formData);
         setLoggedIn(true);
         setLoginOpen(false);
+    };
+
+    const handleProfileClick = (e) => {
+        e.stopPropagation();
+        console.log('Profile clicked');
+        setProfileDropdownOpen(false);
     };
 
     return (
@@ -57,15 +65,18 @@ export default function Header() {
                                     className={style.items}
                                     ref={profileRef}
                                     onMouseEnter={() => {
+                                        console.log('Mouse enter dropdown');
                                         setProfileDropdownOpen(true);
                                     }}
                                 >
                                     Tài khoản
                                     {profileDropdownOpen && (
-                                        <div className={style.dropDownContainer}>
+                                        <div className={`${style.dropDownContainer} z-10`}>
                                             <ul className="font-[500]">
-                                                <li className={style.dropdownItem}>
-                                                    <div className="w-full h-full">Thông tin tài khoản</div>
+                                                <li className={style.dropdownItem} onClick={handleProfileClick}>
+                                                    <Link href="/Profile" className="w-full h-full block">
+                                                        <span>Thông tin tài khoản</span>
+                                                    </Link>
                                                 </li>
                                                 <li className={style.dropdownItem}>
                                                     <div className="w-full h-full" onClick={handleLogoutClick}>

@@ -25,7 +25,6 @@ export default function Login({ isOpen, onClose, onSubmit }) {
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        // Chỉ cho phép nhập số cho trường phoneNumber
         const sanitizedValue = name === 'phoneNumber' ? value.replace(/[^0-9]/g, '') : value;
         setFormData((prev) => ({ ...prev, [name]: sanitizedValue }));
     };
@@ -33,6 +32,13 @@ export default function Login({ isOpen, onClose, onSubmit }) {
     const handleFormSubmit = (e) => {
         e.preventDefault();
         if (formData.fullName.trim() && formData.phoneNumber.trim()) {
+            localStorage.setItem(
+                'userData',
+                JSON.stringify({
+                    fullName: formData.fullName,
+                    phoneNumber: formData.phoneNumber,
+                }),
+            );
             onSubmit(formData);
         } else {
             alert('Vui lòng điền đầy đủ họ và tên và số điện thoại!');

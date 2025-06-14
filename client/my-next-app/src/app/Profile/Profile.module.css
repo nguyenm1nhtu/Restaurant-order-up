@@ -1,0 +1,32 @@
+.main {
+    width: 100%;
+    min-height: 100vh;
+    background-color: #f0f0f0;
+    padding: 0 180px;
+    box-sizing: border-box;
+}
+
+.container {
+    margin-top: var(--header-height);
+    padding-top: 24px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.boxUpdateInfo {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    width: 63%;
+}
+
+.boxTools {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    width: 35%;
+}

@@ -1,8 +1,5 @@
 'use client';
 
-import { useState } from 'react';
-import Link from 'next/link';
-import clsx from 'clsx';
 import style from './Main.module.css';
 import Carousel from './Carousel/Carousel';
 
@@ -33,12 +30,10 @@ export default function Main() {
 
     return (
         <>
-            <div>
-                <div className={style.container}>
-                    <Carousel images={alacarteMenu} />
-                    <Carousel images={tabehoudaiMenu} />
-                    <Carousel images={drinkMenu} />
-                </div>
+            <div className={style.container}>
+                <Carousel images={alacarteMenu} />
+                <Carousel images={tabehoudaiMenu} />
+                <Carousel images={drinkMenu} />
             </div>
         </>
     );
