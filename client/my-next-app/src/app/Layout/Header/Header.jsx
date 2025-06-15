@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import clsx from 'clsx';
-
+import Order from '@/app/Order/Order';
 import { useMouseLeaveDropdown } from '@/app/helper/closeDropdown';
 import style from './Header.module.css';
 import Login from '../Auth/Login';
@@ -14,13 +14,13 @@ export default function Header() {
     const [loggedIn, setLoggedIn] = useState(false);
     const [loginOpen, setLoginOpen] = useState(false);
     const [guestName, setGuestName] = useState('');
+    const [bookingOpen, setBookingOpen] = useState(false);
     const router = useRouter();
 
     const profileRef = useMouseLeaveDropdown(() => {
         setProfileDropdownOpen(false);
     });
 
-    // ✅ Check login status by hitting the /me endpoint
     useEffect(() => {
         fetch('http://localhost:3001/me', {
             credentials: 'include',
@@ -31,7 +31,6 @@ export default function Header() {
             })
             .then((data) => {
                 setLoggedIn(true);
-                // Fix: get name from data.user.Ten_khach_hang
                 setGuestName(data.user?.Ten_khach_hang || 'Khách hàng');
             })
             .catch(() => {
@@ -43,7 +42,6 @@ export default function Header() {
     const handleLogoutClick = async (e) => {
         e.stopPropagation();
 
-        // Clear cookie on backend
         await fetch('http://localhost:3001/logout', {
             method: 'POST',
             credentials: 'include',
@@ -82,6 +80,19 @@ export default function Header() {
     const handleProfileClick = (e) => {
         e.stopPropagation();
         setProfileDropdownOpen(false);
+    };
+
+    const handleBookingClick = () => {
+        setBookingOpen(true);
+    };
+
+    const handleCloseBooking = () => {
+        setBookingOpen(false);
+    };
+
+    const handleBookingConfirm = (bookingData) => {
+        console.log('Booking confirmed:', bookingData);
+        setBookingOpen(false);
     };
 
     return (
@@ -134,13 +145,16 @@ export default function Header() {
                                 </button>
                             )}
 
-                            <button className={clsx(style.headerBtn, style.order)}>ĐẶT BÀN</button>
+                            <button className={clsx(style.headerBtn, style.order)} onClick={handleBookingClick}>
+                                ĐẶT BÀN
+                            </button>
                         </div>
                     </div>
                 </div>
             </header>
 
             <Login isOpen={loginOpen} onClose={handleCloseLogin} onSubmit={handleSubmit} />
+            <Order isOpen={bookingOpen} onClose={handleCloseBooking} onConfirm={handleBookingConfirm} />
         </>
     );
 }

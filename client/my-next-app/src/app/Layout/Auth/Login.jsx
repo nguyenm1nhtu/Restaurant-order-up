@@ -44,14 +44,13 @@ export default function Login({ isOpen, onClose, onSubmit }) {
                     'Content-Type': 'application/json',
                     'phone-number': phoneNumber,
                 },
-                credentials: 'include', // 🔒 to allow cookie storage
+                credentials: 'include',
             });
 
             const data = await response.json();
 
             if (response.ok) {
-                // Cookie is set by the server automatically via Set-Cookie
-                onSubmit(data); // ✅ pass user/token info if needed
+                onSubmit(data);
                 onClose();
             } else {
                 alert(data.message || 'Đăng nhập thất bại!');
