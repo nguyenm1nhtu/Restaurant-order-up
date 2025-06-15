@@ -14,6 +14,7 @@ export default function Menu() {
     const [selectedFood, setSelectedFood] = useState(null);
     const [requestText, setRequestText] = useState('');
     const [quantity, setQuantity] = useState(0);
+    const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
     const categories = [
         { name: 'Thịt bò Aging', img: '/img/menu/aging.png' },
@@ -148,8 +149,7 @@ export default function Menu() {
     const handleAddToCart = () => {
         if (quantity > 0) {
             console.log('Added to cart:', selectedFood, 'Quantity:', quantity, 'Request:', requestText);
-            setSelectedFood(null);
-            setQuantity(0);
+            setShowSuccessPopup(true);
         }
     };
 
@@ -164,6 +164,19 @@ export default function Menu() {
     const closePopup = () => {
         setSelectedFood(null);
         setQuantity(0);
+    };
+
+    const closeSuccessPopup = () => {
+        setShowSuccessPopup(false);
+    };
+
+    const goToCart = () => {
+        console.log('Navigating to cart');
+        setShowSuccessPopup(false);
+    };
+
+    const continueOrdering = () => {
+        setShowSuccessPopup(false);
     };
 
     return (
@@ -226,41 +239,15 @@ export default function Menu() {
                         <div className="w-full h-[1px] bg-white my-4"></div>
                         {selectedFood.combo && (
                             <ul className="text-[14px] text-white mt-6">
-                                <li className="mb-3">
-                                    <FontAwesomeIcon
-                                        icon={faCircleChevronRight}
-                                        style={{ color: '#bf1e2e', marginRight: '5px' }}
-                                    />{' '}
-                                    {selectedFood.combo.steak1}
-                                </li>
-                                <li className="mb-3">
-                                    <FontAwesomeIcon
-                                        icon={faCircleChevronRight}
-                                        style={{ color: '#bf1e2e', marginRight: '10px' }}
-                                    />
-                                    {selectedFood.combo.steak2}
-                                </li>
-                                <li className="mb-3">
-                                    <FontAwesomeIcon
-                                        icon={faCircleChevronRight}
-                                        style={{ color: '#bf1e2e', marginRight: '10px' }}
-                                    />
-                                    {selectedFood.combo.steak3}
-                                </li>
-                                <li className="mb-3">
-                                    <FontAwesomeIcon
-                                        icon={faCircleChevronRight}
-                                        style={{ color: '#bf1e2e', marginRight: '10px' }}
-                                    />
-                                    {selectedFood.combo.steak4}
-                                </li>
-                                <li className="mb-3">
-                                    <FontAwesomeIcon
-                                        icon={faCircleChevronRight}
-                                        style={{ color: '#bf1e2e', marginRight: '10px' }}
-                                    />
-                                    {selectedFood.combo.steak5}
-                                </li>
+                                {Object.values(selectedFood.combo).map((item, index) => (
+                                    <li key={index} className="mb-3">
+                                        <FontAwesomeIcon
+                                            icon={faCircleChevronRight}
+                                            style={{ color: '#bf1e2e', marginRight: index === 0 ? '5px' : '10px' }}
+                                        />
+                                        {item}
+                                    </li>
+                                ))}
                             </ul>
                         )}
                         <div className="mt-10">
@@ -292,7 +279,7 @@ export default function Menu() {
                                 </button>
                             </div>
                             <button
-                                className="mt-4 px-5 py-3 bg-[var(--primary-color)] text-white rounded-[5px] hover:bg-opacity-80 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                                className="cursor-pointer mt-4 px-5 py-3 bg-[var(--primary-color)] text-white rounded-[5px] hover:bg-opacity-80 disabled:bg-gray-300 disabled:cursor-not-allowed"
                                 onClick={handleAddToCart}
                                 disabled={quantity <= 0}
                             >
@@ -301,6 +288,27 @@ export default function Menu() {
                         </div>
                     </>
                 )}
+            </Popup>
+
+            {/* Popup thành công */}
+            <Popup isOpen={showSuccessPopup} onClose={closeSuccessPopup}>
+                <div className="text-center">
+                    <p className="text-white text-[16px] font-semibold mb-10">Thêm vào giỏ hàng thành công!</p>
+                    <div className="flex justify-center gap-4">
+                        <button
+                            className="cursor-pointer px-5 py-2 bg-[var(--primary-color)] text-white rounded-[5px] hover:bg-opacity-80"
+                            onClick={goToCart}
+                        >
+                            <span className="text-[14px] font-semibold">Đến giỏ hàng</span>
+                        </button>
+                        <button
+                            className="cursor-pointer px-5 py-2 bg-gray-300 text-black rounded-[5px] hover:bg-gray-400"
+                            onClick={continueOrdering}
+                        >
+                            <span className="text-[14px] font-semibold">Tiếp tục đặt đơn</span>
+                        </button>
+                    </div>
+                </div>
             </Popup>
         </>
     );
