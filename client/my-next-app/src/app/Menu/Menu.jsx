@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Header from '@/app/Layout/Header/Header';
 import Footer from '@/app/Layout/Footer/Footer';
 import clsx from 'clsx';
@@ -10,140 +10,44 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCircleChevronRight } from '@fortawesome/free-solid-svg-icons';
 
 export default function Menu() {
+    const [foodItems, setFoodItems] = useState([]);
+    const [categories, setCategories] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [selectedFood, setSelectedFood] = useState(null);
     const [requestText, setRequestText] = useState('');
     const [quantity, setQuantity] = useState(0);
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
-    const categories = [
-        { name: 'Thịt bò Aging', img: '/img/menu/aging.png' },
-        { name: 'Món ăn phụ', img: '/img/menu/slide.png' },
-        { name: 'Món ăn kèm', img: '/img/menu/fried.png' },
-        { name: 'Đồ uống', img: '/img/menu/drink.png' },
-    ];
+    useEffect(() => {
+        // Lấy danh mục
+        fetch('http://localhost:3001/menu/danhmuc')
+            .then((res) => res.json())
+            .then((data) => setCategories(data))
+            .catch((err) => console.error('Failed to load categories', err));
 
-    const foodItems = [
-        { name: 'Wagyu Saiko Combo', sales: '1.3k', price: '1.590.000', img: '/img/menu/food.jpg' },
-        { name: 'Cocktail Big Black Cock', sales: '6.9k', price: '1.110.000', img: '/img/menu/food.jpg' },
-        { name: 'Wagyu Saiko Combo', sales: '1.3k', price: '1.590.000', img: '/img/menu/food.jpg' },
-        { name: 'Wagyu Saiko Combo', sales: '1.3k', price: '1.590.000', img: '/img/menu/food.jpg' },
-        { name: 'Wagyu Saiko Combo', sales: '1.3k', price: '1.590.000', img: '/img/menu/food.jpg' },
-        { name: 'Wagyu Saiko Combo', sales: '1.3k', price: '1.590.000', img: '/img/menu/food.jpg' },
-        { name: 'Wagyu Saiko Combo', sales: '1.3k', price: '1.590.000', img: '/img/menu/food.jpg' },
-        { name: 'Wagyu Saiko Combo', sales: '1.3k', price: '1.590.000', img: '/img/menu/food.jpg' },
-    ];
-
-    const foodDescription = [
-        {
-            name: 'Wagyu Saiko Combo',
-            sales: '6.9k',
-            price: '1.590.000',
-            img: '/img/menu/food.jpg',
-            combo: {
-                steak1: 'Aging SirLoin Wagyu A5 (100gr)',
-                steak2: 'Chuck Short Rib Wagyu A4 (100gr)',
-                steak3: 'Aging Rib Eye (100gr)',
-                steak4: 'Aging Chuck Flap (100gr)',
-                steak5: 'Aging Chuch Eye Roll (100gr)',
-            },
-        },
-        {
-            name: 'Cocktail Big Black Cock',
-            sales: '1.3k',
-            price: '1.110.000',
-            img: '/img/menu/food.jpg',
-        },
-        {
-            name: 'Wagyu Saiko Combo',
-            sales: '1.3k',
-            price: '1.590.000',
-            img: '/img/menu/food.jpg',
-            combo: {
-                steak1: 'Aging SirLoin Wagyu A5 (100gr)',
-                steak2: 'Chuck Short Rib Wagyu A4 (100gr)',
-                steak3: 'Aging Rib Eye (100gr)',
-                steak4: 'Aging Chuck Flap (100gr)',
-                steak5: 'Aging Chuch Eye Roll (100gr)',
-            },
-        },
-        {
-            name: 'Wagyu Saiko Combo',
-            sales: '1.3k',
-            price: '1.590.000',
-            img: '/img/menu/food.jpg',
-            combo: {
-                steak1: 'Aging SirLoin Wagyu A5 (100gr)',
-                steak2: 'Chuck Short Rib Wagyu A4 (100gr)',
-                steak3: 'Aging Rib Eye (100gr)',
-                steak4: 'Aging Chuck Flap (100gr)',
-                steak5: 'Aging Chuch Eye Roll (100gr)',
-            },
-        },
-        {
-            name: 'Wagyu Saiko Combo',
-            sales: '1.3k',
-            price: '1.590.000',
-            img: '/img/menu/food.jpg',
-            combo: {
-                steak1: 'Aging SirLoin Wagyu A5 (100gr)',
-                steak2: 'Chuck Short Rib Wagyu A4 (100gr)',
-                steak3: 'Aging Rib Eye (100gr)',
-                steak4: 'Aging Chuck Flap (100gr)',
-                steak5: 'Aging Chuch Eye Roll (100gr)',
-            },
-        },
-        {
-            name: 'Wagyu Saiko Combo',
-            sales: '1.3k',
-            price: '1.590.000',
-            img: '/img/menu/food.jpg',
-            combo: {
-                steak1: 'Aging SirLoin Wagyu A5 (100gr)',
-                steak2: 'Chuck Short Rib Wagyu A4 (100gr)',
-                steak3: 'Aging Rib Eye (100gr)',
-                steak4: 'Aging Chuck Flap (100gr)',
-                steak5: 'Aging Chuch Eye Roll (100gr)',
-            },
-        },
-        {
-            name: 'Wagyu Saiko Combo',
-            sales: '1.3k',
-            price: '1.590.000',
-            img: '/img/menu/food.jpg',
-            combo: {
-                steak1: 'Aging SirLoin Wagyu A5 (100gr)',
-                steak2: 'Chuck Short Rib Wagyu A4 (100gr)',
-                steak3: 'Aging Rib Eye (100gr)',
-                steak4: 'Aging Chuck Flap (100gr)',
-                steak5: 'Aging Chuch Eye Roll (100gr)',
-            },
-        },
-        {
-            name: 'Wagyu Saiko Combo',
-            sales: '1.3k',
-            price: '1.590.000',
-            img: '/img/menu/food.jpg',
-            combo: {
-                steak1: 'Aging SirLoin Wagyu A5 (100gr)',
-                steak2: 'Chuck Short Rib Wagyu A4 (100gr)',
-                steak3: 'Aging Rib Eye (100gr)',
-                steak4: 'Aging Chuck Flap (100gr)',
-                steak5: 'Aging Chuch Eye Roll (100gr)',
-            },
-        },
-    ];
-
+        // Lấy danh sách món ăn
+        fetch('http://localhost:3001/menu/monan')
+            .then((res) => res.json())
+            .then((data) => setFoodItems(data))
+            .catch((err) => console.error('Failed to load food items', err));
+    }, []);
     const handleCategoryClick = (category) => {
         setSelectedCategory(category);
         console.log('Selected category:', category);
     };
 
-    const handleFoodClick = (food) => {
-        const foodWithCombo = foodDescription.find((fd) => fd.name === food.name);
-        setSelectedFood({ ...food, ...foodWithCombo });
-        setRequestText('');
-        setQuantity(0);
+    const handleFoodClick = async (food) => {
+        console.log('Food clicked:', food);
+        try {
+            const res = await fetch(`http://localhost:3001/menu/monan/${food.Ma_mon_an}`);
+            if (!res.ok) throw new Error('Không tìm thấy món ăn');
+            const data = await res.json();
+            setSelectedFood(data);
+            setRequestText('');
+            setQuantity(0);
+        } catch (err) {
+            console.error("Lỗi khi lấy thông tin món ăn: ", err);
+        }
     };
 
     const handleAddToCart = () => {
@@ -187,30 +91,30 @@ export default function Menu() {
                     <div className={style.category}>
                         {categories.map((category) => (
                             <div
-                                key={category.name}
-                                className={clsx(style.categoryItem, selectedCategory === category.name && style.active)}
-                                onClick={() => handleCategoryClick(category.name)}
+                                key={category.Ma_danh_muc}
+                                className={clsx(style.categoryItem, selectedCategory === category.Ten_danh_muc && style.active)}
+                                onClick={() => handleCategoryClick(category.Ten_danh_muc)}
                             >
                                 <div className="w-[100px] object-fit">
-                                    <img src={category.img} alt={category.name} />
+                                    {/* <img src={category.img} alt={category.name} /> */}
                                 </div>
-                                <span className="font-bold text-[14px] uppercase">{category.name}</span>
+                                <span className="font-bold text-[14px] uppercase">{category.Ten_danh_muc}</span>
                             </div>
                         ))}
                     </div>
 
                     <div className="w-full mt-[60px] flex flex-wrap gap-[20px] mr-[-20px]">
-                        {foodItems.map((item, index) => (
-                            <div key={index} className={style.foodItem} onClick={() => handleFoodClick(item)}>
-                                <img src={item.img} alt={item.name} className="object-fit rounded-[15px]" />
+                        {foodItems.map((item) => (
+                            <div key={item.Ma_mon_an} className={style.foodItem} onClick={() => handleFoodClick(item)}>
+                                {/* <img src={item.img} alt={item.name} className="object-fit rounded-[15px]" /> */}
                                 <div className="flex flex-col text-white w-full">
-                                    <p className="text-[20px] font-semibold">{item.name}</p>
-                                    <span className="text-[14px]">
+                                    <p className="text-[20px] font-semibold">{item.Ten_mon_an}</p>
+                                    {/* <span className="text-[14px]">
                                         Lượt bán: <span>{item.sales}</span>
-                                    </span>
+                                    </span> */}
                                 </div>
                                 <p className="text-[#bfa96d] text-[16px]">
-                                    Giá bán: <span className="font-semibold">{item.price}</span>
+                                    Giá bán: <span className="font-semibold">{item.Don_gia}</span>
                                     <span className="font-semibold"> vnđ</span>
                                 </p>
 

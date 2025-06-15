@@ -1,9 +1,8 @@
-// routes/menu.js
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
 
-// lay tat ca cac mon an
+// Lấy tất cả các món ăn
 router.get('/monan', (req, res) => {
   db.query('SELECT * FROM mon_an', (err, results) => {
     if (err) {
@@ -14,7 +13,7 @@ router.get('/monan', (req, res) => {
   });
 });
 
-// lay cac danh muc do an
+// Lấy tất cả danh mục món ăn
 router.get('/danhmuc', (req, res) => {
   db.query('SELECT * FROM danh_muc_mon_an', (err, results) => {
     if (err) {
@@ -25,26 +24,49 @@ router.get('/danhmuc', (req, res) => {
   });
 });
 
-// Lấy thông tin món ăn theo ID
+// Lấy thông tin món ăn theo ID (món đơn hoặc combo)
 router.get('/monan/:id', (req, res) => {
   const id = req.params.id;
 
-  db.query('SELECT * FROM mon_an WHERE Ma_mon_an = ? and Ma_mon_an LIKE "MA%"', [id], (err, results) => {
-    if (err) {
-      console.error('Lỗi truy vấn:', err);
-      return res.status(500).send('Lỗi truy vấn cơ sở dữ liệu');
-    }
-
-    if (results.length === 0) {
-      return res.status(404).send('Không tìm thấy món ăn');
-    }
-
-    res.json(results[0]);
-  });
+  if (id.startsWith('MA')) {
+    // Truy vấn món đơn
+    db.query(
+      'SELECT * FROM mon_an WHERE Ma_mon_an = ?',
+      [id],
+      (err, results) => {
+        if (err) {
+          console.error('Lỗi truy vấn:', err);
+          return res.status(500).send('Lỗi truy vấn cơ sở dữ liệu');
+        }
+        if (results.length === 0) {
+          return res.status(404).send('Không tìm thấy món ăn');
+        }
+        res.json(results[0]);
+      }
+    );
+  } else {
+    // Truy vấn các món trong combo
+    db.query(
+      `SELECT m.* 
+       FROM mon_an m 
+       JOIN combo_chi_tiet c ON m.Ma_mon_an = c.Ma_mon_don 
+       WHERE c.Ma_combo = ?`,
+      [id],
+      (err, results) => {
+        if (err) {
+          console.error('Lỗi truy vấn:', err);
+          return res.status(500).send('Lỗi truy vấn cơ sở dữ liệu');
+        }
+        if (results.length === 0) {
+          return res.status(404).send('Không tìm thấy món ăn trong combo');
+        }
+        res.json(results);
+      }
+    );
+  }
 });
 
-
-// Lấy thông tin danh mục món ăn theo ID
+// Lấy thông tin danh mục theo ID
 router.get('/danhmuc/:id', (req, res) => {
   const id = req.params.id;
 
@@ -53,17 +75,14 @@ router.get('/danhmuc/:id', (req, res) => {
       console.error('Lỗi truy vấn:', err);
       return res.status(500).send('Lỗi truy vấn cơ sở dữ liệu');
     }
-
     if (results.length === 0) {
       return res.status(404).send('Không tìm thấy danh mục món ăn');
     }
-
     res.json(results[0]);
   });
 });
 
-
-// Lấy thông tin món ăn theo danh mục món ăn
+// Lấy các món ăn thuộc danh mục cụ thể
 router.get('/danhmuc/:id/monan', (req, res) => {
   const id = req.params.id;
 
@@ -72,16 +91,14 @@ router.get('/danhmuc/:id/monan', (req, res) => {
       console.error('Lỗi truy vấn:', err);
       return res.status(500).send('Lỗi truy vấn cơ sở dữ liệu');
     }
-
     if (results.length === 0) {
-      return res.status(404).send('Không tìm thấy danh mục món ăn');
+      return res.status(404).send('Không có món ăn nào thuộc danh mục này');
     }
-
-    res.json(results[0]);
+    res.json(results);
   });
 });
 
-  // GET /menu/search?keyword=bun
+// Tìm kiếm món ăn theo tên
 router.get('/search', (req, res) => {
   const keyword = req.query.keyword;
 
@@ -97,29 +114,8 @@ router.get('/search', (req, res) => {
       console.error('Lỗi truy vấn:', err);
       return res.status(500).send('Lỗi truy vấn cơ sở dữ liệu');
     }
-
     res.json(results);
   });
 });
-
-// lay combo cac mon an theo ID
-router.get('/monan/:id', (req, res) => {
-  const id = req.params.id;
-
-  db.query('SELECT * FROM mon_an m JOIN combo_chi_tiet c ON m.Ma_mon_an = c.Ma_mon_don WHERE c.Ma_combo = ?', [id], (err, results) => {
-    if (err) {
-      console.error('Lỗi truy vấn:', err);
-      return res.status(500).send('Lỗi truy vấn cơ sở dữ liệu');
-    }
-
-    if (results.length === 0) {
-      return res.status(404).send('Không tìm thấy món ăn');
-    }
-
-    res.json(results[0]);
-  });
-});
-
-
 
 module.exports = router;
