@@ -1,28 +1,56 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import clsx from 'clsx';
+
 import { useMouseLeaveDropdown } from '@/app/helper/closeDropdown';
 import style from './Header.module.css';
 import Login from '../Auth/Login';
 
 export default function Header() {
     const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
-    const [loggedIn, setLoggedIn] = useState(true);
+    const [loggedIn, setLoggedIn] = useState(false);
     const [loginOpen, setLoginOpen] = useState(false);
+    const [guestName, setGuestName] = useState('');
     const router = useRouter();
 
     const profileRef = useMouseLeaveDropdown(() => {
-        console.log('Mouse leave dropdown');
         setProfileDropdownOpen(false);
     });
 
-    const handleLogoutClick = (e) => {
+    // ✅ Check login status by hitting the /me endpoint
+    useEffect(() => {
+        fetch('http://localhost:3001/me', {
+            credentials: 'include',
+        })
+            .then((res) => {
+                if (!res.ok) throw new Error('Not authenticated');
+                return res.json();
+            })
+            .then((data) => {
+                setLoggedIn(true);
+                // Fix: get name from data.user.Ten_khach_hang
+                setGuestName(data.user?.Ten_khach_hang || 'Khách hàng');
+            })
+            .catch(() => {
+                setLoggedIn(false);
+                setGuestName('');
+            });
+    }, []);
+
+    const handleLogoutClick = async (e) => {
         e.stopPropagation();
-        console.log('Logout clicked');
+
+        // Clear cookie on backend
+        await fetch('http://localhost:3001/logout', {
+            method: 'POST',
+            credentials: 'include',
+        });
+
         setLoggedIn(false);
+        setGuestName('');
         setProfileDropdownOpen(false);
     };
 
@@ -34,15 +62,25 @@ export default function Header() {
         setLoginOpen(false);
     };
 
-    const handleSubmit = (formData) => {
-        console.log('Form submitted:', formData);
-        setLoggedIn(true);
-        setLoginOpen(false);
+    const handleSubmit = async (data) => {
+        try {
+            const res = await fetch('http://localhost:3001/me', {
+                credentials: 'include',
+            });
+
+            if (res.ok) {
+                const userData = await res.json();
+                setGuestName(userData.user?.Ten_khach_hang || 'Khách hàng');
+                setLoggedIn(true);
+                setLoginOpen(false);
+            }
+        } catch (err) {
+            console.error('Login failed to fetch user info:', err);
+        }
     };
 
     const handleProfileClick = (e) => {
         e.stopPropagation();
-        console.log('Profile clicked');
         setProfileDropdownOpen(false);
     };
 
@@ -61,19 +99,18 @@ export default function Header() {
                             <div className={style.items}>
                                 <Link href="/Menu">Thực đơn</Link>
                             </div>
-                            <div className={style.items}>Giỏ hàng</div>
+                            <div className={style.items}>
+                                <Link href="/Cart">Giỏ hàng</Link>
+                            </div>
                             <div className={style.items}>Thanh Toán</div>
 
                             {loggedIn ? (
                                 <div
                                     className={style.items}
                                     ref={profileRef}
-                                    onMouseEnter={() => {
-                                        console.log('Mouse enter dropdown');
-                                        setProfileDropdownOpen(true);
-                                    }}
+                                    onMouseEnter={() => setProfileDropdownOpen(true)}
                                 >
-                                    Tài khoản
+                                    <span>{guestName}</span>
                                     {profileDropdownOpen && (
                                         <div className={`${style.dropDownContainer} z-10`}>
                                             <ul className="font-[500]">

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
-const verifyToken = require('../middleware/auth');
+const verifyToken = require('../middleware/auth.js');
 
 
 router.post('/cart/add', verifyToken, async (req, res) => {
@@ -215,9 +215,11 @@ router.post('/tinh-tien/:maHoaDon', (req, res) => {
 
 // hien mon an trong gio hang
 router.get('/cart/monan', verifyToken, (req, res) => {
-  const maKhachHang = req.user.Ma_khach_hang;
-
-  db.query('SELECT * FROM mon_an m join chi_tiet_hoa_don cthd on m.Ma_mon_an = cthd.Ma_mon_an join hoa_don hd on cthd.Ma_hoa_don = hd.Ma_hoa_don where Ma_khach_hang = ? and Tinh_trang = 0',
+  // Debug: log the full req.user object
+  console.log('req.user:', req.user);
+  const maKhachHang = req.user.user?.Ma_khach_hang || req.user.Ma_khach_hang;
+  console.log('maKhachHang:', maKhachHang);
+  db.query('SELECT m.Ma_mon_an, Ten_mon_an, Don_gia, So_luong, Hinh_anh FROM mon_an m join chi_tiet_hoa_don cthd on m.Ma_mon_an = cthd.Ma_mon_an join hoa_don hd on cthd.Ma_hoa_don = hd.Ma_hoa_don where Ma_khach_hang = ? and Tinh_trang = 0',
      [maKhachHang], (err, results) => {
     if (err) {
       console.error(err);

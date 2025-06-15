@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 const SECRET_KEY = "123456";
 
 const verifyToken = (req, res, next) => {
-  const token = req.cookies.access_token || req.headers["access-token"];
+  const token = req.cookies['access-token'] || req.headers['access-token'];
 
   if (!token) {
     return res.status(401).json({ status: "error", message: "Không có token" });
