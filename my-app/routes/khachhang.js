@@ -16,12 +16,12 @@ router.get('/', (req, res) => {
 });
 
 router.get('/profile', verifyToken, (req, res) => {
-  const userId = req.user.Ma_khach_hang;
+  const userId = req.user.user?.Ma_khach_hang;
   if (!userId) {
     return res.status(401).send('Bạn chưa đăng nhập');
   }
 
-  db.query('SELECT kh.Ten_khach_hang, kh.So_dien_thoai, tv.Email, htv.Ten_hang_thanh_vien FROM khach_hang kh join thanh_vien tv on kh.Ma_khach_hang = tv.Ma_khach_hang join hang_thanh_vien htv on tv.Ma_hang_thanh_vien = htv.Ma_hang_thanh_vien WHERE Ma_khach_hang = ?', [userId], (err, results) => {
+  db.query('SELECT kh.Ten_khach_hang, kh.So_dien_thoai, tv.Email, htv.Ten_hang_thanh_vien FROM khach_hang kh join thanh_vien tv on kh.Ma_khach_hang = tv.Ma_khach_hang join hang_thanh_vien htv on tv.Ma_hang_thanh_vien = htv.Ma_hang_thanh_vien WHERE kh.Ma_khach_hang = ?', [userId], (err, results) => {
     if (err) {
       console.error(err);
       return res.status(500).send('Lỗi truy vấn cơ sở dữ liệu');
@@ -35,10 +35,10 @@ router.get('/profile', verifyToken, (req, res) => {
   });
 });
 
-router.put('profile/update', verifyToken, (req, res) => {
-  const userId = req.user.Ma_khach_hang;
+// Fix: add leading slash to route path
+router.put('/profile/update', verifyToken, (req, res) => {
+  const userId = req.user.user?.Ma_khach_hang;
   const { Ten_khach_hang, Email } = req.body;
-
   if (!userId) {
     return res.status(401).send('Bạn chưa đăng nhập');
   }

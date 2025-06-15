@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { FaTrash } from 'react-icons/fa';
 import Header from '@/app/Layout/Header/Header';
 import Footer from '@/app/Layout/Footer/Footer';
 
@@ -9,15 +11,16 @@ export default function Cart() {
     const [loading, setLoading] = useState(true);
     const [paymentMethods, setPaymentMethods] = useState([]);
     const [paymentMethod, setPaymentMethod] = useState('cash');
+    const [showConfirmPopup, setShowConfirmPopup] = useState(false);
+    const [showThanksPopup, setShowThanksPopup] = useState(false);
+    const router = useRouter();
 
     useEffect(() => {
         const fetchCartItems = async () => {
             try {
                 const res = await fetch('http://localhost:3001/receipt/cart/monan', {
                     method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
                 });
 
@@ -103,11 +106,12 @@ export default function Cart() {
 
     const total = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
 
-    const handleConfirmOrder = async () => {
+    const confirmOrder = async () => {
         if (total === 0) {
             alert('Bạn chưa chọn món ăn nào!');
             return;
         }
+
         try {
             await fetch('http://localhost:3001/receipt/confirm-order', {
                 method: 'PUT',
@@ -117,8 +121,14 @@ export default function Cart() {
                 credentials: 'include',
                 body: JSON.stringify({ paymentMethod }),
             });
+
+            setShowConfirmPopup(false);
+            setShowThanksPopup(true);
+            // Immediately redirect when popup is shown
+            router.push('/');
         } catch (err) {
             console.error('Failed to confirm order:', err);
+            alert('Lỗi khi đặt món!');
         }
     };
 
@@ -175,12 +185,11 @@ export default function Cart() {
                                     title="Xóa món"
                                     onClick={() => handleRemoveItem(item.id)}
                                 >
-                                    ×
+                                    <FaTrash />
                                 </button>
                             </div>
                         ))}
 
-                        {/* Chi tiết thanh toán */}
                         <div className="mt-6">
                             <h2 className="font-bold mb-2">Phương thức thanh toán</h2>
                             <div className="space-y-2">
@@ -206,7 +215,7 @@ export default function Cart() {
 
                             <button
                                 className="mt-4 w-full py-2 bg-black text-white rounded"
-                                onClick={handleConfirmOrder}
+                                onClick={() => setShowConfirmPopup(true)}
                             >
                                 Xác nhận đặt món
                             </button>
@@ -214,6 +223,60 @@ export default function Cart() {
                     </>
                 )}
             </div>
+
+            {/* Confirmation Popup */}
+            {showConfirmPopup && (
+                <div className="fixed inset-0 z-50 bg-black bg-opacity-30 flex items-center justify-center">
+                    <div className="bg-white w-[90%] max-w-2xl rounded-xl p-12 shadow-lg relative">
+                        <button
+                            onClick={() => setShowConfirmPopup(false)}
+                            className="absolute top-2 right-2 text-gray-500 hover:text-black text-xl"
+                        >
+                            ×
+                        </button>
+                        <p className="text-center text-2xl font-bold">
+                            Bạn có chắc chắn muốn <span className="text-red-600 font-semibold">Thanh toán</span> giỏ hàng không?
+                        </p>
+                        <div className="flex justify-around mt-6 gap-4">
+                            <button
+                                onClick={() => setShowConfirmPopup(false)}
+                                className="flex-1 px-6 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 font-semibold"
+                            >
+                                Không
+                            </button>
+                            <button
+                                onClick={confirmOrder}
+                                className="flex-1 px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold"
+                            >
+                                Có
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Thank You Popup */}
+            {showThanksPopup && (
+                <div className="fixed inset-0 z-50 bg-black bg-opacity-30 flex items-center justify-center">
+                    <div className="bg-white w-[90%] max-w-2xl rounded-xl p-12 shadow-lg relative text-center">
+                        <p className="text-3xl font-bold mb-4">
+                            <span className="text-red-600">Ushi Mania</span> xin cảm ơn quý khách đã sử dụng dịch vụ tại nhà hàng.
+                        </p>
+                        <p className="text-lg text-gray-700 mb-4">
+                            Quý khách vui lòng đợi một chút, nhân viên của Ushi Mania sẽ gửi hóa đơn tới quý khách trong ít phút.
+                        </p>
+                        <button
+                            onClick={() => {
+                                setShowThanksPopup(false);
+                                router.push('/');
+                            }}
+                            className="bg-red-600 text-white font-semibold py-2 px-4 rounded hover:bg-red-700"
+                        >
+                            Đóng
+                        </button>
+                    </div>
+                </div>
+            )}
 
             <Footer />
         </>

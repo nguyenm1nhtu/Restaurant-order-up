@@ -268,9 +268,11 @@ router.put('/confirm-order', verifyToken, async (req, res) => {
       return res.status(400).json({ message: 'Chưa có hóa đơn đang mở' });
     }
     const ma_hoa_don = hoaDon[0].Ma_hoa_don;
+    const { paymentMethod } = req.body;
+    console.log('[confirm-order] paymentMethod:', paymentMethod, 'type:', typeof paymentMethod);
     await db.promise().query(
-      'UPDATE hoa_don SET Tinh_trang = 1 WHERE Ma_hoa_don = ?',
-      [ma_hoa_don]
+      'UPDATE hoa_don SET Tinh_trang = 1, Ma_phuong_thuc_thanh_toan = ? WHERE Ma_hoa_don = ?',
+      [paymentMethod, ma_hoa_don]
     );
     res.json({ message: 'Đã xác nhận đặt món, hóa đơn chuyển sang trạng thái chờ thanh toán.' });
   } catch (err) {
