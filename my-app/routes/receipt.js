@@ -6,7 +6,7 @@ const verifyToken = require('../middleware/auth');
 
 router.post('/cart/add', verifyToken, async (req, res) => {
   const { Ma_mon_an, So_luong, Ghi_chu } = req.body;
-  const ma_khach_hang = req.user.ma_khach_hang;
+  const ma_khach_hang = req.user.Ma_khach_hang;
 
   try {
     // Tìm hóa đơn chưa thanh toán của người dùng
@@ -211,5 +211,20 @@ router.post('/tinh-tien/:maHoaDon', (req, res) => {
     });
   });
 });
+
+
+// hien mon an trong gio hang
+router.get('/cart/monan', verifyToken, (req, res) => {
+  const maKhachHang = req.user.Ma_khach_hang;
+
+  db.query('SELECT * FROM mon_an m join chi_tiet_hoa_don cthd on m.Ma_mon_an = cthd.Ma_mon_an join hoa_don hd on cthd.Ma_hoa_don = hd.Ma_hoa_don where Ma_khach_hang = ? and Tinh_trang = 0',
+     [maKhachHang], (err, results) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send('Lỗi truy vấn cơ sở dữ liệu');
+    }
+    res.json(results);
+  });
+})
 
 module.exports = router;

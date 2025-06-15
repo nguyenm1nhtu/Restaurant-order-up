@@ -10,7 +10,7 @@ var loginRouter = require('./routes/login');
 var bookingTableRouter = require('./routes/bookingTable');
 var khachHangRouter = require('./routes/khachhang');
 var menuRouter = require('./routes/menu');
-var recipeRouter = require('./routes/recipe')
+var receiptRouter = require('./routes/receipt')
 
 var app = express();
 
@@ -30,7 +30,7 @@ app.use('/login', loginRouter);
 app.use('/bookingTable', bookingTableRouter);
 app.use('/khachhang', khachHangRouter);
 app.use('/menu', menuRouter);
-app.use('/recipe', recipeRouter);
+app.use('/receipt', receiptRouter);
 
 app.use(function(req, res, next) {
   next(createError(404));
