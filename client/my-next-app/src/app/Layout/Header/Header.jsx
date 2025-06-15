@@ -13,9 +13,7 @@ export default function Header() {
     const [loggedIn, setLoggedIn] = useState(false);
     const [loginOpen, setLoginOpen] = useState(false);
     const [guestName, setGuestName] = useState('');
-    const [guestName, setGuestName] = useState('');
     const [bookingOpen, setBookingOpen] = useState(false);
-    const router = useRouter();
 
     const profileRef = useMouseLeaveDropdown(() => {
         setProfileDropdownOpen(false);
