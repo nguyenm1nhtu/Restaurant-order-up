@@ -52,25 +52,34 @@ router.post('/cart/add', verifyToken, async (req, res) => {
 
 router.put('/cart/update', verifyToken, async (req, res) => {
   const { Ma_mon_an, So_luong } = req.body;
-  const ma_khach_hang = req.user.ma_khach_hang;
-
+  const ma_khach_hang = req.user.user?.Ma_khach_hang || req.user.Ma_khach_hang;
   try {
     const [hoaDon] = await db.promise().query(
-      'SELECT Ma_hoa_don FROM hoa_don WHERE Ma_khach_hang = ? AND Trang_thai = 0',
+      'SELECT Ma_hoa_don FROM hoa_don WHERE Ma_khach_hang = ? AND Tinh_trang = 0',
       [ma_khach_hang]
     );
-
     if (hoaDon.length === 0) {
       return res.status(400).json({ message: 'Chưa có hóa đơn đang mở' });
     }
-
     const ma_hoa_don = hoaDon[0].Ma_hoa_don;
-
-    await db.promise().query(
-      'UPDATE chi_tiet_hoa_don SET So_luong = ? WHERE Ma_hoa_don = ? AND Ma_mon_an = ?',
-      [So_luong, ma_hoa_don, Ma_mon_an]
+    // Check if the item exists in chi_tiet_hoa_don
+    const [existing] = await db.promise().query(
+      'SELECT * FROM chi_tiet_hoa_don WHERE Ma_hoa_don = ? AND Ma_mon_an = ?',
+      [ma_hoa_don, Ma_mon_an]
     );
-
+    if (existing.length > 0) {
+      // Update the quantity
+      await db.promise().query(
+        'UPDATE chi_tiet_hoa_don SET So_luong = ? WHERE Ma_hoa_don = ? AND Ma_mon_an = ?',
+        [So_luong, ma_hoa_don, Ma_mon_an]
+      );
+    } else {
+      // Insert new if not exists
+      await db.promise().query(
+        'INSERT INTO chi_tiet_hoa_don (Ma_hoa_don, Ma_mon_an, So_luong) VALUES (?, ?, ?)',
+        [ma_hoa_don, Ma_mon_an, So_luong]
+      );
+    }
     res.json({ message: 'Cập nhật số lượng thành công' });
   } catch (err) {
     console.error(err);
@@ -102,35 +111,6 @@ router.delete('/cart/remove', verifyToken, async (req, res) => {
     );
 
     res.json({ message: 'Xóa món khỏi giỏ hàng thành công' });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Lỗi máy chủ' });
-  }
-});
-
-
-// dat mon
-router.put('/order', verifyToken, async (req, res) => {
-  const ma_khach_hang = req.user.ma_khach_hang;
-
-  try {
-    const [hoaDon] = await db.promise().query(
-      'SELECT Ma_hoa_don FROM hoa_don WHERE Ma_khach_hang = ? AND Trang_thai = 0',
-      [ma_khach_hang]
-    );
-
-    if (hoaDon.length === 0) {
-      return res.status(400).json({ message: 'Chưa có hóa đơn đang mở' });
-    }
-
-    const ma_hoa_don = hoaDon[0].Ma_hoa_don;
-
-    await db.promise().query(
-      'UPDATE hoa_don SET Trang_thai = 1 WHERE Ma_hoa_don = ?',
-      [ma_hoa_don]
-    );
-
-    res.json({ message: 'Cập nhật số lượng thành công' });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Lỗi máy chủ' });
@@ -228,5 +208,51 @@ router.get('/cart/monan', verifyToken, (req, res) => {
     res.json(results);
   });
 })
+
+// Update total amount in hoa_don
+router.put('/update-total', verifyToken, async (req, res) => {
+  const { tong_tien } = req.body;
+  const ma_khach_hang = req.user.user?.Ma_khach_hang || req.user.Ma_khach_hang;
+  try {
+    const [hoaDon] = await db.promise().query(
+      'SELECT Ma_hoa_don FROM hoa_don WHERE Ma_khach_hang = ? AND Tinh_trang = 0',
+      [ma_khach_hang]
+    );
+    if (hoaDon.length === 0) {
+      return res.status(400).json({ message: 'Chưa có hóa đơn đang mở' });
+    }
+    const ma_hoa_don = hoaDon[0].Ma_hoa_don;
+    await db.promise().query(
+      'UPDATE hoa_don SET Tong_tien = ? WHERE Ma_hoa_don = ?',
+      [tong_tien, ma_hoa_don]
+    );
+    res.json({ message: 'Cập nhật tổng tiền thành công' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Lỗi máy chủ' });
+  }
+});
+
+router.put('/confirm-order', verifyToken, async (req, res) => {
+  const ma_khach_hang = req.user.user?.Ma_khach_hang || req.user.Ma_khach_hang;
+  try {
+    const [hoaDon] = await db.promise().query(
+      'SELECT Ma_hoa_don FROM hoa_don WHERE Ma_khach_hang = ? AND Tinh_trang = 0',
+      [ma_khach_hang]
+    );
+    if (hoaDon.length === 0) {
+      return res.status(400).json({ message: 'Chưa có hóa đơn đang mở' });
+    }
+    const ma_hoa_don = hoaDon[0].Ma_hoa_don;
+    await db.promise().query(
+      'UPDATE hoa_don SET Tinh_trang = 1 WHERE Ma_hoa_don = ?',
+      [ma_hoa_don]
+    );
+    res.json({ message: 'Đã xác nhận đặt món, hóa đơn chuyển sang trạng thái chờ thanh toán.' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Lỗi máy chủ' });
+  }
+});
 
 module.exports = router;

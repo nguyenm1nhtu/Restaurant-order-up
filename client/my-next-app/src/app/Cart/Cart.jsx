@@ -8,6 +8,8 @@ export default function Cart() {
     const [activeTab, setActiveTab] = useState('cart');
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [orderedItems, setOrderedItems] = useState([]);
+    const [orderedLoading, setOrderedLoading] = useState(true);
 
     useEffect(() => {
         const fetchCartItems = async () => {
@@ -48,14 +50,71 @@ export default function Cart() {
         fetchCartItems();
     }, []);
 
+    useEffect(() => {
+        const fetchOrderedItems = async () => {
+            try {
+                const res = await fetch('http://localhost:3001/receipt/ordered/monan', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                });
+                if (!res.ok) throw new Error('Failed to fetch ordered data');
+                const data = await res.json();
+                if (Array.isArray(data)) {
+                    const formatted = data.map((item) => ({
+                        id: item.Ma_mon_an,
+                        name: item.Ten_mon_an,
+                        price: item.Don_gia,
+                        quantity: item.So_luong || 1,
+                        status: item.Trang_thai || '',
+                        image: item.Hinh_anh || '/images/default.jpg',
+                        children: item.Combo_items || [], // if you have combo children
+                    }));
+                    setOrderedItems(formatted);
+                } else {
+                    setOrderedItems([]);
+                }
+            } catch (err) {
+                console.error('Lỗi khi lấy dữ liệu món đã gọi:', err);
+                setOrderedItems([]);
+            } finally {
+                setOrderedLoading(false);
+            }
+        };
+        fetchOrderedItems();
+    }, []);
+
     const toggleCheck = (id) => {
         setItems(items.map((item) => (item.id === id ? { ...item, checked: !item.checked } : item)));
     };
 
-    const changeQuantity = (id, delta) => {
-        setItems(
-            items.map((item) => (item.id === id ? { ...item, quantity: Math.max(1, item.quantity + delta) } : item)),
-        );
+    // Update backend immediately on quantity change
+    const changeQuantity = async (id, delta) => {
+        setItems((prevItems) => {
+            const updated = prevItems.map((item) =>
+                item.id === id ? { ...item, quantity: Math.max(1, item.quantity + delta) } : item
+            );
+            // Find the updated item
+            const changedItem = updated.find((item) => item.id === id);
+            if (changedItem) {
+                fetch('http://localhost:3001/receipt/cart/update', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        Ma_mon_an: changedItem.id,
+                        So_luong: changedItem.quantity,
+                    }),
+                }).catch((err) => {
+                    console.error('Failed to update item quantity:', changedItem.id, err);
+                });
+            }
+            return updated;
+        });
     };
 
     const total = items.filter((i) => i.checked).reduce((sum, i) => sum + i.price * i.quantity, 0);
@@ -87,6 +146,58 @@ export default function Cart() {
     ];
 
     const orderedTotal = calledItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+    // Sync total to backend on unload, using the displayed total
+    useEffect(() => {
+        const handleBeforeUnload = async () => {
+            // Get the displayed total from the DOM
+            const totalSpan = document.querySelector('.font-bold span:last-child');
+            if (totalSpan) {
+                // Extract number from "4,450,000đ"
+                const totalText = totalSpan.textContent.replace(/[^\d]/g, '');
+                const totalAmount = parseInt(totalText, 10) || 0;
+                try {
+                    await fetch('http://localhost:3001/receipt/update-total', {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        credentials: 'include',
+                        body: JSON.stringify({
+                            tong_tien: totalAmount
+                        }),
+                    });
+                } catch (err) {
+                    console.error('Failed to update total in hoa_don:', err);
+                }
+            }
+        };
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => {
+            handleBeforeUnload();
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
+    }, []);
+
+    // Handler for confirming the order
+    const handleConfirmOrder = async () => {
+        if (total === 0) {
+            alert('Bạn chưa chọn món ăn nào!');
+            return;
+        }
+        try {
+            await fetch('http://localhost:3001/receipt/confirm-order', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+            });
+            // Optionally, you can refresh data or show a success message here
+        } catch (err) {
+            console.error('Failed to confirm order:', err);
+        }
+    };
 
     return (
         <>
@@ -166,7 +277,7 @@ export default function Cart() {
                                     <span>Tổng:</span>
                                     <span>{total.toLocaleString()}đ</span>
                                 </div>
-                                <button className="mt-4 w-full py-2 bg-black text-white rounded">
+                                <button className="mt-4 w-full py-2 bg-black text-white rounded" onClick={handleConfirmOrder}>
                                     Xác nhận đặt món
                                 </button>
                             </>
@@ -174,41 +285,45 @@ export default function Cart() {
                     </div>
                 ) : (
                     <div className="space-y-6">
-                        {calledItems.map((item) => (
-                            <div key={item.id}>
-                                <div className="flex items-start">
-                                    <div className="w-2/3 flex items-center space-x-2">
-                                        <span className="bg-red-600 text-white text-sm px-2 py-0.5 rounded">
-                                            {item.quantity}x
-                                        </span>
-                                        <span className="font-semibold">{item.name}</span>
-                                    </div>
-
-                                    <div className="w-1/6 text-gray-600 whitespace-nowrap">{item.status}</div>
-
-                                    <div className="w-1/6 text-red-600 font-semibold text-right whitespace-nowrap">
-                                        {item.price.toLocaleString()}đ
-                                    </div>
-                                </div>
-
-                                {item.children.length > 0 && (
-                                    <div className="mt-2 space-y-1 ml-6">
-                                        {item.children.map((subItem, idx) => (
-                                            <div key={idx} className="flex items-center text-sm text-gray-700">
-                                                <span className="bg-gray-200 text-xs px-2 py-0.5 rounded mr-2">1x</span>
-                                                Combo: {subItem}
+                        {orderedLoading ? (
+                            <div className="text-center text-gray-500">Đang tải dữ liệu...</div>
+                        ) : orderedItems.length === 0 ? (
+                            <div className="text-center text-gray-500">Chưa có món nào đã gọi.</div>
+                        ) : (
+                            <>
+                                {orderedItems.map((item) => (
+                                    <div key={item.id}>
+                                        <div className="flex items-start">
+                                            <div className="w-2/3 flex items-center space-x-2">
+                                                <span className="bg-red-600 text-white text-sm px-2 py-0.5 rounded">
+                                                    {item.quantity}x
+                                                </span>
+                                                <span className="font-semibold">{item.name}</span>
                                             </div>
-                                        ))}
+                                            <div className="w-1/6 text-gray-600 whitespace-nowrap">{item.status}</div>
+                                            <div className="w-1/6 text-red-600 font-semibold text-right whitespace-nowrap">
+                                                {item.price.toLocaleString()}đ
+                                            </div>
+                                        </div>
+                                        {item.children && item.children.length > 0 && (
+                                            <div className="mt-2 space-y-1 ml-6">
+                                                {item.children.map((subItem, idx) => (
+                                                    <div key={idx} className="flex items-center text-sm text-gray-700">
+                                                        <span className="bg-gray-200 text-xs px-2 py-0.5 rounded mr-2">1x</span>
+                                                        Combo: {subItem}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
-                                )}
-                            </div>
-                        ))}
-
-                        <div className="flex justify-between items-center mt-6 font-bold">
-                            <span>Tổng:</span>
-                            <span>{orderedTotal.toLocaleString()}đ</span>
-                        </div>
-                        <button className="mt-4 w-full py-2 bg-black text-white rounded">Kết thúc dịch vụ</button>
+                                ))}
+                                <div className="flex justify-between items-center mt-6 font-bold">
+                                    <span>Tổng:</span>
+                                    <span>{orderedItems.reduce((sum, item) => sum + item.price * item.quantity, 0).toLocaleString()}đ</span>
+                                </div>
+                                <button className="mt-4 w-full py-2 bg-black text-white rounded">Kết thúc dịch vụ</button>
+                            </>
+                        )}
                     </div>
                 )}
             </div>
