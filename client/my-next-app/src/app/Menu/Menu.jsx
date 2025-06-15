@@ -136,7 +136,11 @@ export default function Menu() {
                     <div className="w-full mt-[60px] flex flex-wrap gap-[20px] mr-[-20px]">
                         {foodItems.map((item) => (
                             <div key={item.Ma_mon_an} className={style.foodItem} onClick={() => handleFoodClick(item)}>
-                                {/* <img src={item.img} alt={item.name} className="object-fit rounded-[15px]" /> */}
+                                <img 
+                                    src={item.Hinh_anh ? `/img/monan/${item.Hinh_anh}` : '/placeholder.svg'} 
+                                    alt={item.Ten_mon_an} 
+                                    className="object-fit rounded-[15px]" 
+                                />
                                 <div className="flex flex-col text-white w-full">
                                     <p className="text-[20px] font-semibold">{item.Ten_mon_an}</p>
                                     {/* <span className="text-[14px]">
@@ -162,7 +166,7 @@ export default function Menu() {
                 {selectedFood && (
                     <>
                         <img
-                            src={selectedFood.img}
+                            src={selectedFood.Hinh_anh ? `/img/monan/${selectedFood.Hinh_anh}` : '/placeholder.svg'}
                             alt={selectedFood.Ten_mon_an}
                             className="w-full h-[150px] object-cover rounded-[15px]"
                         />
