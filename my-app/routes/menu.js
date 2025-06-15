@@ -28,10 +28,10 @@ router.get('/danhmuc', (req, res) => {
 router.get('/monan/:id', (req, res) => {
   const id = req.params.id;
 
-  if (id.startsWith('MA')) {
+  if (1 === 1) {
     // Truy vấn món đơn
     db.query(
-      'SELECT * FROM mon_an WHERE Ma_mon_an = ?',
+      'SELECT Ma_mon_an, Ten_mon_an, Mo_ta, Don_gia, Hinh_anh, Ma_danh_muc FROM mon_an WHERE Ma_mon_an = ?',
       [id],
       (err, results) => {
         if (err) {
@@ -42,25 +42,6 @@ router.get('/monan/:id', (req, res) => {
           return res.status(404).send('Không tìm thấy món ăn');
         }
         res.json(results[0]);
-      }
-    );
-  } else {
-    // Truy vấn các món trong combo
-    db.query(
-      `SELECT m.* 
-       FROM mon_an m 
-       JOIN combo_chi_tiet c ON m.Ma_mon_an = c.Ma_mon_don 
-       WHERE c.Ma_combo = ?`,
-      [id],
-      (err, results) => {
-        if (err) {
-          console.error('Lỗi truy vấn:', err);
-          return res.status(500).send('Lỗi truy vấn cơ sở dữ liệu');
-        }
-        if (results.length === 0) {
-          return res.status(404).send('Không tìm thấy món ăn trong combo');
-        }
-        res.json(results);
       }
     );
   }

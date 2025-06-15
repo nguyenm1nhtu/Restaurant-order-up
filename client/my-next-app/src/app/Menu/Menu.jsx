@@ -59,10 +59,31 @@ export default function Menu() {
         }
     };
 
-    const handleAddToCart = () => {
-        if (quantity > 0) {
-            console.log('Added to cart:', selectedFood, 'Quantity:', quantity, 'Request:', requestText);
-            setShowSuccessPopup(true);
+    const handleAddToCart = async () => {
+        if (quantity > 0 && selectedFood) {
+            try {
+                const cartItem = {
+                    Ma_mon_an: selectedFood.Ma_mon_an,
+                    So_luong: quantity,
+                    Ghi_chu: requestText,
+                };
+
+                const res = await fetch('http://localhost:3001/receipt/cart/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify(cartItem),
+                });
+
+                if (!res.ok) throw new Error('Failed to add item to cart');
+
+                console.log('Added to cart:', cartItem);
+                setShowSuccessPopup(true);
+            } catch (err) {
+                console.error('Error adding item to cart:', err);
+            }
         }
     };
 
@@ -212,7 +233,7 @@ export default function Menu() {
                             className="cursor-pointer px-5 py-2 bg-[var(--primary-color)] text-white rounded-[5px] hover:bg-opacity-80"
                             onClick={goToCart}
                         >
-                            <span className="text-[14px] font-semibold"><Link href="/cart">Đến giỏ hàng</Link></span>
+                            <span className="text-[14px] font-semibold"><Link href="/Cart">Đến giỏ hàng</Link></span>
                         </button>
                         <button
                             className="cursor-pointer px-5 py-2 bg-gray-300 text-black rounded-[5px] hover:bg-gray-400"

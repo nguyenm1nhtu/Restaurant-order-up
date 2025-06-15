@@ -23,7 +23,7 @@ async function recalculateAndUpdateTotalAndVAT(ma_hoa_don) {
 
 router.post('/cart/add', verifyToken, async (req, res) => {
   const { Ma_mon_an, So_luong, Ghi_chu } = req.body;
-  const ma_khach_hang = req.user.Ma_khach_hang;
+  const ma_khach_hang = req.user.user?.Ma_khach_hang || req.user.Ma_khach_hang;
 
   try {
     // Tìm hóa đơn chưa thanh toán của người dùng
