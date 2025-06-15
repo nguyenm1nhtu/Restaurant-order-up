@@ -24,7 +24,7 @@ export default function Menu() {
 
     const foodItems = [
         { name: 'Wagyu Saiko Combo', sales: '1.3k', price: '1.590.000', img: '/img/menu/food.jpg' },
-        { name: 'Wagyu Saiko Combo', sales: '1.3k', price: '1.590.000', img: '/img/menu/food.jpg' },
+        { name: 'Cocktail Big Black Cock', sales: '6.9k', price: '1.110.000', img: '/img/menu/food.jpg' },
         { name: 'Wagyu Saiko Combo', sales: '1.3k', price: '1.590.000', img: '/img/menu/food.jpg' },
         { name: 'Wagyu Saiko Combo', sales: '1.3k', price: '1.590.000', img: '/img/menu/food.jpg' },
         { name: 'Wagyu Saiko Combo', sales: '1.3k', price: '1.590.000', img: '/img/menu/food.jpg' },
@@ -36,7 +36,7 @@ export default function Menu() {
     const foodDescription = [
         {
             name: 'Wagyu Saiko Combo',
-            sales: '1.3k',
+            sales: '6.9k',
             price: '1.590.000',
             img: '/img/menu/food.jpg',
             combo: {
@@ -48,17 +48,10 @@ export default function Menu() {
             },
         },
         {
-            name: 'Wagyu Saiko Combo',
+            name: 'Cocktail Big Black Cock',
             sales: '1.3k',
-            price: '1.590.000',
+            price: '1.110.000',
             img: '/img/menu/food.jpg',
-            combo: {
-                steak1: 'Aging SirLoin Wagyu A5 (100gr)',
-                steak2: 'Chuck Short Rib Wagyu A4 (100gr)',
-                steak3: 'Aging Rib Eye (100gr)',
-                steak4: 'Aging Chuck Flap (100gr)',
-                steak5: 'Aging Chuch Eye Roll (100gr)',
-            },
         },
         {
             name: 'Wagyu Saiko Combo',
@@ -231,44 +224,45 @@ export default function Menu() {
                             <span className="font-semibold">{selectedFood.price}</span> vnđ
                         </p>
                         <div className="w-full h-[1px] bg-white my-4"></div>
-                        <ul className="text-[14px] text-white mt-6">
-                            <li className="mb-3">
-                                <FontAwesomeIcon
-                                    icon={faCircleChevronRight}
-                                    style={{ color: '#bf1e2e', marginRight: '5px' }}
-                                />{' '}
-                                {selectedFood.combo.steak1}
-                            </li>
-                            <li className="mb-3">
-                                {' '}
-                                <FontAwesomeIcon
-                                    icon={faCircleChevronRight}
-                                    style={{ color: '#bf1e2e', marginRight: '10px' }}
-                                />
-                                {selectedFood.combo.steak2}
-                            </li>
-                            <li className="mb-3">
-                                <FontAwesomeIcon
-                                    icon={faCircleChevronRight}
-                                    style={{ color: '#bf1e2e', marginRight: '10px' }}
-                                />
-                                {selectedFood.combo.steak3}
-                            </li>
-                            <li className="mb-3">
-                                <FontAwesomeIcon
-                                    icon={faCircleChevronRight}
-                                    style={{ color: '#bf1e2e', marginRight: '10px' }}
-                                />
-                                {selectedFood.combo.steak4}
-                            </li>
-                            <li className="mb-3">
-                                <FontAwesomeIcon
-                                    icon={faCircleChevronRight}
-                                    style={{ color: '#bf1e2e', marginRight: '10px' }}
-                                />
-                                {selectedFood.combo.steak5}
-                            </li>
-                        </ul>
+                        {selectedFood.combo && (
+                            <ul className="text-[14px] text-white mt-6">
+                                <li className="mb-3">
+                                    <FontAwesomeIcon
+                                        icon={faCircleChevronRight}
+                                        style={{ color: '#bf1e2e', marginRight: '5px' }}
+                                    />{' '}
+                                    {selectedFood.combo.steak1}
+                                </li>
+                                <li className="mb-3">
+                                    <FontAwesomeIcon
+                                        icon={faCircleChevronRight}
+                                        style={{ color: '#bf1e2e', marginRight: '10px' }}
+                                    />
+                                    {selectedFood.combo.steak2}
+                                </li>
+                                <li className="mb-3">
+                                    <FontAwesomeIcon
+                                        icon={faCircleChevronRight}
+                                        style={{ color: '#bf1e2e', marginRight: '10px' }}
+                                    />
+                                    {selectedFood.combo.steak3}
+                                </li>
+                                <li className="mb-3">
+                                    <FontAwesomeIcon
+                                        icon={faCircleChevronRight}
+                                        style={{ color: '#bf1e2e', marginRight: '10px' }}
+                                    />
+                                    {selectedFood.combo.steak4}
+                                </li>
+                                <li className="mb-3">
+                                    <FontAwesomeIcon
+                                        icon={faCircleChevronRight}
+                                        style={{ color: '#bf1e2e', marginRight: '10px' }}
+                                    />
+                                    {selectedFood.combo.steak5}
+                                </li>
+                            </ul>
+                        )}
                         <div className="mt-10">
                             <label className="text-[14px] text-white font-semibold">Yêu cầu của bạn</label>
                             <textarea

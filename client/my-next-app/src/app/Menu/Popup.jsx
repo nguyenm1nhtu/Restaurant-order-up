@@ -32,7 +32,7 @@ export default function Popup({ isOpen, onClose, children }) {
         >
             <div
                 ref={popupRef}
-                className="flex flex-col justify-center relative bg-black rounded-[15px] shadow-lg w-[350px] h-[90%]"
+                className="flex flex-col justify-center relative bg-black rounded-[15px] shadow-lg w-[350px] py-12"
                 style={{ border: '3px solid white' }}
                 onClick={(e) => e.stopPropagation()}
             >
@@ -44,7 +44,7 @@ export default function Popup({ isOpen, onClose, children }) {
                         ×
                     </button>
                 </div>
-                <div className="px-12 h-[90%] mt-5">{children}</div>
+                <div className="px-12 mt-5">{children}</div>
             </div>
         </div>
     );
