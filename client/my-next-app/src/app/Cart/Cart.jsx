@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { FaTrash } from 'react-icons/fa';
 import Header from '@/app/Layout/Header/Header';
 import Footer from '@/app/Layout/Footer/Footer';
 
@@ -184,7 +185,7 @@ export default function Cart() {
                                     title="Xóa món"
                                     onClick={() => handleRemoveItem(item.id)}
                                 >
-                                    ×
+                                    <FaTrash />
                                 </button>
                             </div>
                         ))}
@@ -226,7 +227,7 @@ export default function Cart() {
             {/* Confirmation Popup */}
             {showConfirmPopup && (
                 <div className="fixed inset-0 z-50 bg-black bg-opacity-30 flex items-center justify-center">
-                    <div className="bg-white w-[90%] max-w-sm rounded-xl p-6 shadow-lg relative">
+                    <div className="bg-white w-[90%] max-w-2xl rounded-xl p-12 shadow-lg relative">
                         <button
                             onClick={() => setShowConfirmPopup(false)}
                             className="absolute top-2 right-2 text-gray-500 hover:text-black text-xl"
@@ -257,7 +258,7 @@ export default function Cart() {
             {/* Thank You Popup */}
             {showThanksPopup && (
                 <div className="fixed inset-0 z-50 bg-black bg-opacity-30 flex items-center justify-center">
-                    <div className="bg-white w-[90%] max-w-sm rounded-xl p-6 shadow-lg relative text-center">
+                    <div className="bg-white w-[90%] max-w-2xl rounded-xl p-12 shadow-lg relative text-center">
                         <p className="text-3xl font-bold mb-4">
                             <span className="text-red-600">Ushi Mania</span> xin cảm ơn quý khách đã sử dụng dịch vụ tại nhà hàng.
                         </p>
