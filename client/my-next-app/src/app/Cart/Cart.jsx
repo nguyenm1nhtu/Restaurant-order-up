@@ -155,7 +155,7 @@ export default function Cart() {
                                 className="flex items-center border border-red-200 rounded p-2 mb-3"
                             >
                                 <img
-                                    src={item.image}
+                                    src={item.image ? `/img/monan/${item.image}` : '/placeholder.svg'}
                                     alt={item.name}
                                     className="w-16 h-16 object-cover rounded mr-3 border"
                                 />
