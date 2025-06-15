@@ -8,13 +8,13 @@ import Order from '@/app/Order/Order';
 import { useMouseLeaveDropdown } from '@/app/helper/closeDropdown';
 import style from './Header.module.css';
 import Login from '../Auth/Login';
-
+import Cookies from 'js-cookie';
 export default function Header() {
     const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
     const [loggedIn, setLoggedIn] = useState(false);
     const [loginOpen, setLoginOpen] = useState(false);
-    const [guestName, setGuestName] = useState('');
     const [bookingOpen, setBookingOpen] = useState(false);
+    const [guestName, setGuestName] = useState('');
     const router = useRouter();
 
     const profileRef = useMouseLeaveDropdown(() => {
@@ -22,21 +22,27 @@ export default function Header() {
     });
 
     useEffect(() => {
-        fetch('http://localhost:3001/me', {
-            credentials: 'include',
-        })
-            .then((res) => {
-                if (!res.ok) throw new Error('Not authenticated');
-                return res.json();
+        const token = Cookies.get('access_token');
+        if (token) {
+            setLoggedIn(true);
+            fetch('http://localhost:3001/me', {
+                credentials: 'include',
             })
-            .then((data) => {
-                setLoggedIn(true);
-                setGuestName(data.user?.Ten_khach_hang || 'Khách hàng');
-            })
-            .catch(() => {
-                setLoggedIn(false);
-                setGuestName('');
-            });
+                .then((res) => {
+                    if (!res.ok) throw new Error('Not authenticated');
+                    return res.json();
+                })
+                .then((data) => {
+                    setGuestName(data.user?.Ten_khach_hang || 'Khách hàng');
+                })
+                .catch(() => {
+                    setLoggedIn(false);
+                    setGuestName('');
+                });
+        } else {
+            setLoggedIn(false);
+            setGuestName('');
+        }
     }, []);
 
     const handleLogoutClick = async (e) => {
@@ -47,6 +53,7 @@ export default function Header() {
             credentials: 'include',
         });
 
+        Cookies.remove('access_token');
         setLoggedIn(false);
         setGuestName('');
         setProfileDropdownOpen(false);
@@ -83,7 +90,12 @@ export default function Header() {
     };
 
     const handleBookingClick = () => {
-        setBookingOpen(true);
+        const token = Cookies.get('access_token');
+        if (token) {
+            setBookingOpen(true);
+        } else {
+            setLoginOpen(true);
+        }
     };
 
     const handleCloseBooking = () => {
@@ -92,7 +104,6 @@ export default function Header() {
 
     const handleBookingConfirm = (bookingData) => {
         console.log('Booking confirmed:', bookingData);
-        setBookingOpen(false);
     };
 
     return (
