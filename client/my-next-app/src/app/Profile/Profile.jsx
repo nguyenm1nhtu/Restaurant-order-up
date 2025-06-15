@@ -1,11 +1,31 @@
 'use client';
 
+import { useState } from 'react';
 import Header from '@/app/Layout/Header/Header';
 import style from './Profile.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPhone, faEnvelope, faUserTie, faClockRotateLeft, faAngleDown } from '@fortawesome/free-solid-svg-icons';
 
 export default function Profile() {
+    const [formData, setFormData] = useState({
+        fullName: '',
+        phoneNumber: '',
+        email: '',
+    });
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        const sanitizedValue = name === 'phoneNumber' ? value.replace(/[^0-9]/g, '') : value;
+        setFormData((prev) => ({ ...prev, [name]: sanitizedValue }));
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        console.log('Form submitted:', formData);
+    };
+
+    const isSubmitDisabled = !formData.fullName.trim() || !formData.phoneNumber.trim();
+
     return (
         <>
             <Header />
@@ -16,7 +36,7 @@ export default function Profile() {
                         <p className="text-[14px] text-gray mb-7">
                             <span className="text-[var(--primary-color)]">( * ) </span> Các thông tin bắt buộc
                         </p>
-                        <form>
+                        <form onSubmit={handleSubmit}>
                             <div className="mb-6">
                                 <label className="block text-[14px] mb-3 font-semibold">
                                     Họ và tên: <span className="text-[var(--primary-color)]"> * </span>
@@ -26,35 +46,42 @@ export default function Profile() {
                                     name="fullName"
                                     className="w-full p-5 border rounded-[10px]"
                                     placeholder="Nhập họ và tên"
+                                    value={formData.fullName}
+                                    onChange={handleInputChange}
+                                    required
                                 />
                             </div>
                             <div className="mb-6">
                                 <label className="block text-[14px] mb-3 font-semibold">
-                                    Số điện thoại: <span className="text-[var(--primary-color)]"> * </span>{' '}
+                                    Số điện thoại: <span className="text-[var(--primary-color)]"> * </span>
                                 </label>
                                 <input
                                     type="tel"
                                     name="phoneNumber"
                                     className="w-full p-5 border rounded-[10px]"
                                     placeholder="Nhập số điện thoại"
+                                    value={formData.phoneNumber}
+                                    onChange={handleInputChange}
+                                    pattern="[0-9]*"
                                     required
                                 />
                             </div>
                             <div className="mb-6">
                                 <label className="block text-[14px] mb-3 font-semibold">Email:</label>
                                 <input
-                                    type="tel"
-                                    name="phoneNumber"
+                                    type="email"
+                                    name="email"
                                     className="w-full p-5 border rounded-[10px]"
                                     placeholder="Nhập email"
-                                    required
+                                    value={formData.email}
+                                    onChange={handleInputChange}
                                 />
                             </div>
 
                             <button
                                 type="submit"
                                 className="cursor-pointer mt-6 w-full bg-[var(--primary-color)] text-white px-2 rounded hover:opacity-80 rounded-[10px] font-bold py-5 disabled:bg-gray-300 disabled:cursor-not-allowed"
-                                // disabled={!formData.fullName.trim() || !formData.phoneNumber.trim()}
+                                disabled={isSubmitDisabled}
                             >
                                 LƯU THÔNG TIN
                             </button>
@@ -77,10 +104,10 @@ export default function Profile() {
                         <p className="text-[16px] text-gray flex gap-[15px] items-center mb-4">
                             <FontAwesomeIcon icon={faUserTie} />
                             <span className="font-semibold">Thành viên: </span>
-                            <span>SILVER I</span>
+                            <span>SILVER</span>
                         </p>
 
-                        <div
+                        {/* <div
                             className="mt-2 text-[16px] text-gray flex justify-between items-center w-full py-5 hover:text-[var(--primary-color)] cursor-pointer"
                             style={{ borderBottom: '1px solid #e8ebed' }}
                         >
@@ -89,7 +116,7 @@ export default function Profile() {
                                 Lịch sử hóa đơn
                             </div>
                             <FontAwesomeIcon icon={faAngleDown} />
-                        </div>
+                        </div> */}
                     </div>
                 </div>
             </div>

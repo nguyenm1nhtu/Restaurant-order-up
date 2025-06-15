@@ -4,14 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAngleRight, faAngleLeft } from '@fortawesome/free-solid-svg-icons';
 
-export default function Carousel({
-    images = [],
-    height = '700px',
-    autoPlayInterval = 5000,
-    slidesPerView = 3,
-    buttonSize = 52,
-    buttonOffset = 40,
-}) {
+export default function Carousel({ images = [], height = '700px', autoPlayInterval = 5000, slidesPerView = 3 }) {
     const slides = [...images.slice(-slidesPerView), ...images, ...images.slice(0, slidesPerView)];
 
     const [currentIndex, setCurrentIndex] = useState(slidesPerView);
@@ -101,13 +94,13 @@ export default function Carousel({
 
             <button
                 onClick={goToPrev}
-                className={`w-[${buttonSize}px] h-[${buttonSize}px] absolute top-1/2 -left-${buttonOffset} transform -translate-y-1/2 bg-[#8d8d8d] bg-opacity-50 text-white font-bold rounded-[5px] hover:bg-opacity-80 flex items-center justify-center text-[20px] cursor-pointer`}
+                className={`w-[48px] h-[48px] absolute top-1/2 -left-[80px] transform -translate-y-1/2 bg-[#8d8d8d] bg-opacity-50 text-white font-bold rounded-[5px] hover:bg-opacity-80 flex items-center justify-center text-[20px] cursor-pointer`}
             >
                 <FontAwesomeIcon icon={faAngleLeft} />
             </button>
             <button
                 onClick={goToNext}
-                className={`w-[${buttonSize}px] h-[${buttonSize}px] absolute top-1/2 -right-${buttonOffset} transform -translate-y-1/2 bg-[#8d8d8d] bg-opacity-50 text-white font-bold rounded-[5px] hover:bg-opacity-75 flex items-center justify-center text-[20px] cursor-pointer`}
+                className={`w-[48px] h-[48px] absolute top-1/2 -right-[80px] transform -translate-y-1/2 bg-[#8d8d8d] bg-opacity-50 text-white font-bold rounded-[5px] hover:bg-opacity-75 flex items-center justify-center text-[20px] cursor-pointer`}
             >
                 <FontAwesomeIcon icon={faAngleRight} />
             </button>

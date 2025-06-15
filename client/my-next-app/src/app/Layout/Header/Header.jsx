@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import clsx from 'clsx';
 import { useMouseLeaveDropdown } from '@/app/helper/closeDropdown';
@@ -11,6 +12,7 @@ export default function Header() {
     const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
     const [loggedIn, setLoggedIn] = useState(true);
     const [loginOpen, setLoginOpen] = useState(false);
+    const router = useRouter();
 
     const profileRef = useMouseLeaveDropdown(() => {
         console.log('Mouse leave dropdown');
@@ -56,7 +58,9 @@ export default function Header() {
                         </div>
 
                         <div className="flex items-center gap-[5px] h-full">
-                            <div className={style.items}>Thực đơn</div>
+                            <div className={style.items}>
+                                <Link href="/Menu">Thực đơn</Link>
+                            </div>
                             <div className={style.items}>Giỏ hàng</div>
                             <div className={style.items}>Thanh Toán</div>
 
