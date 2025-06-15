@@ -6,22 +6,21 @@ export default function Login({ isOpen, onClose, onSubmit }) {
     const [formData, setFormData] = useState({ fullName: '', phoneNumber: '' });
     const popupRef = useRef(null);
 
-    const handleClickOutside = (event) => {
-        if (popupRef.current && !popupRef.current.contains(event.target)) {
-            onClose();
-        }
-    };
-
     useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (popupRef.current && !popupRef.current.contains(event.target)) {
+                onClose();
+            }
+        };
+
         if (isOpen) {
             document.addEventListener('mousedown', handleClickOutside);
-        } else {
-            document.removeEventListener('mousedown', handleClickOutside);
         }
+
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [isOpen]);
+    }, [isOpen, onClose]);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -29,19 +28,37 @@ export default function Login({ isOpen, onClose, onSubmit }) {
         setFormData((prev) => ({ ...prev, [name]: sanitizedValue }));
     };
 
-    const handleFormSubmit = (e) => {
+    const handleFormSubmit = async (e) => {
         e.preventDefault();
-        if (formData.fullName.trim() && formData.phoneNumber.trim()) {
-            localStorage.setItem(
-                'userData',
-                JSON.stringify({
-                    fullName: formData.fullName,
-                    phoneNumber: formData.phoneNumber,
-                }),
-            );
-            onSubmit(formData);
-        } else {
+        const { fullName, phoneNumber } = formData;
+
+        if (!fullName.trim() || !phoneNumber.trim()) {
             alert('Vui lòng điền đầy đủ họ và tên và số điện thoại!');
+            return;
+        }
+
+        try {
+            const response = await fetch('http://localhost:3001/login', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'phone-number': phoneNumber,
+                },
+                credentials: 'include', // 🔒 to allow cookie storage
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // Cookie is set by the server automatically via Set-Cookie
+                onSubmit(data); // ✅ pass user/token info if needed
+                onClose();
+            } else {
+                alert(data.message || 'Đăng nhập thất bại!');
+            }
+        } catch (error) {
+            console.error('Lỗi khi gửi yêu cầu đăng nhập:', error);
+            alert('Đã xảy ra lỗi. Vui lòng thử lại sau.');
         }
     };
 
@@ -63,9 +80,11 @@ export default function Login({ isOpen, onClose, onSubmit }) {
                         ×
                     </button>
                 </div>
+
                 <h2 className="text-[17px] font-bold my-6 pb-4">
                     <span className="text-[var(--primary-color)]">Ushi Mania</span> xin kính chào quý khách!
                 </h2>
+
                 <form onSubmit={handleFormSubmit}>
                     <div className="mb-6">
                         <label className="block text-[14px] mb-3 font-semibold">
@@ -80,6 +99,7 @@ export default function Login({ isOpen, onClose, onSubmit }) {
                             placeholder="Nhập họ và tên"
                         />
                     </div>
+
                     <div className="mb-6">
                         <label className="block text-[14px] mb-3 font-semibold">
                             Quý khách vui lòng điền số điện thoại:
@@ -94,9 +114,10 @@ export default function Login({ isOpen, onClose, onSubmit }) {
                             required
                         />
                     </div>
+
                     <button
                         type="submit"
-                        className="cursor-pointer mt-6 w-full bg-[var(--primary-color)] text-white px-2 rounded hover:opacity-80 rounded-[10px] font-bold py-5 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                        className="cursor-pointer mt-6 w-full bg-[var(--primary-color)] text-white px-2 rounded hover:opacity-80 font-bold py-5 disabled:bg-gray-300 disabled:cursor-not-allowed"
                         disabled={!formData.fullName.trim() || !formData.phoneNumber.trim()}
                     >
                         XÁC NHẬN
