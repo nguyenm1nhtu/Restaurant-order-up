@@ -5,11 +5,10 @@ import Header from '@/app/Layout/Header/Header';
 import Footer from '@/app/Layout/Footer/Footer';
 
 export default function Cart() {
-    const [activeTab, setActiveTab] = useState('cart');
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [orderedItems, setOrderedItems] = useState([]);
-    const [orderedLoading, setOrderedLoading] = useState(true);
+    const [paymentMethods, setPaymentMethods] = useState([]);
+    const [paymentMethod, setPaymentMethod] = useState('cash');
 
     useEffect(() => {
         const fetchCartItems = async () => {
@@ -19,7 +18,7 @@ export default function Cart() {
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    credentials: 'include', // Needed if you're using cookies/session
+                    credentials: 'include',
                 });
 
                 if (!res.ok) throw new Error('Failed to fetch cart data');
@@ -30,8 +29,7 @@ export default function Cart() {
                     const formatted = data.map((item) => ({
                         id: item.Ma_mon_an,
                         name: item.Ten_mon_an,
-                        price: item.Don_gia, // Fixed: use Don_gia from backend
-                        checked: true,
+                        price: item.Don_gia,
                         quantity: item.So_luong || 1,
                         image: item.Hinh_anh || '/images/default.jpg',
                     }));
@@ -47,63 +45,35 @@ export default function Cart() {
             }
         };
 
-        fetchCartItems();
-    }, []);
-
-    useEffect(() => {
-        const fetchOrderedItems = async () => {
+        const fetchPaymentMethods = async () => {
             try {
-                const res = await fetch('http://localhost:3001/receipt/ordered/monan', {
+                const res = await fetch('http://localhost:3001/receipt/payment-methods', {
                     method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
                 });
-                if (!res.ok) throw new Error('Failed to fetch ordered data');
+                if (!res.ok) throw new Error('Failed to fetch payment methods');
                 const data = await res.json();
-                if (Array.isArray(data)) {
-                    const formatted = data.map((item) => ({
-                        id: item.Ma_mon_an,
-                        name: item.Ten_mon_an,
-                        price: item.Don_gia,
-                        quantity: item.So_luong || 1,
-                        status: item.Trang_thai || '',
-                        image: item.Hinh_anh || '/images/default.jpg',
-                        children: item.Combo_items || [], // if you have combo children
-                    }));
-                    setOrderedItems(formatted);
-                } else {
-                    setOrderedItems([]);
-                }
+                setPaymentMethods(data);
+                if (data.length > 0) setPaymentMethod(data[0].Ma_phuong_thuc_thanh_toan.toString());
             } catch (err) {
-                console.error('Lỗi khi lấy dữ liệu món đã gọi:', err);
-                setOrderedItems([]);
-            } finally {
-                setOrderedLoading(false);
+                console.error('Lỗi khi lấy phương thức thanh toán:', err);
             }
         };
-        fetchOrderedItems();
+
+        fetchCartItems();
+        fetchPaymentMethods();
     }, []);
 
-    const toggleCheck = (id) => {
-        setItems(items.map((item) => (item.id === id ? { ...item, checked: !item.checked } : item)));
-    };
-
-    // Update backend immediately on quantity change
     const changeQuantity = async (id, delta) => {
         setItems((prevItems) => {
             const updated = prevItems.map((item) =>
                 item.id === id ? { ...item, quantity: Math.max(1, item.quantity + delta) } : item
             );
-            // Find the updated item
             const changedItem = updated.find((item) => item.id === id);
             if (changedItem) {
                 fetch('http://localhost:3001/receipt/cart/update', {
                     method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
                     body: JSON.stringify({
                         Ma_mon_an: changedItem.id,
@@ -117,69 +87,22 @@ export default function Cart() {
         });
     };
 
-    const total = items.filter((i) => i.checked).reduce((sum, i) => sum + i.price * i.quantity, 0);
+    const handleRemoveItem = async (id) => {
+        setItems((prevItems) => prevItems.filter((item) => item.id !== id));
+        try {
+            await fetch('http://localhost:3001/receipt/cart/remove', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ Ma_mon_an: id }),
+            });
+        } catch (err) {
+            console.error('Failed to remove item:', id, err);
+        }
+    };
 
-    const calledItems = [
-        {
-            id: 1,
-            name: 'Wagyu Saiko Combo',
-            quantity: 1,
-            status: 'Đang chế biến',
-            price: 1590000,
-            children: [
-                'Thăn ngoại Aging Wagyu A5 (100g)',
-                'Thịt sườn Aging Wagyu A4 (100g)',
-                'Lõi thăn sườn Aging (100g)',
-                'Lõi vai Aging (100g)',
-                'Sườn Aging (100g)',
-                'Ức vai Aging (100g)',
-            ],
-        },
-        {
-            id: 2,
-            name: 'Chuck Flap Premium Aging Beef',
-            quantity: 1,
-            status: 'Đang chế biến',
-            price: 209000,
-            children: [],
-        },
-    ];
+    const total = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
 
-    const orderedTotal = calledItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-
-    // Sync total to backend on unload, using the displayed total
-    useEffect(() => {
-        const handleBeforeUnload = async () => {
-            // Get the displayed total from the DOM
-            const totalSpan = document.querySelector('.font-bold span:last-child');
-            if (totalSpan) {
-                // Extract number from "4,450,000đ"
-                const totalText = totalSpan.textContent.replace(/[^\d]/g, '');
-                const totalAmount = parseInt(totalText, 10) || 0;
-                try {
-                    await fetch('http://localhost:3001/receipt/update-total', {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        credentials: 'include',
-                        body: JSON.stringify({
-                            tong_tien: totalAmount
-                        }),
-                    });
-                } catch (err) {
-                    console.error('Failed to update total in hoa_don:', err);
-                }
-            }
-        };
-        window.addEventListener('beforeunload', handleBeforeUnload);
-        return () => {
-            handleBeforeUnload();
-            window.removeEventListener('beforeunload', handleBeforeUnload);
-        };
-    }, []);
-
-    // Handler for confirming the order
     const handleConfirmOrder = async () => {
         if (total === 0) {
             alert('Bạn chưa chọn món ăn nào!');
@@ -192,8 +115,8 @@ export default function Cart() {
                     'Content-Type': 'application/json',
                 },
                 credentials: 'include',
+                body: JSON.stringify({ paymentMethod }),
             });
-            // Optionally, you can refresh data or show a success message here
         } catch (err) {
             console.error('Failed to confirm order:', err);
         }
@@ -207,126 +130,91 @@ export default function Cart() {
 
             <div className="pt-[80px] px-4 max-w-5xl mx-auto pb-10 min-h-[calc(100vh-160px)]">
                 <div className="flex justify-center space-x-6 mb-4">
-                    <button
-                        onClick={() => setActiveTab('cart')}
-                        className={`pb-2 ${
-                            activeTab === 'cart' ? 'border-b-2 border-red-500 font-bold' : 'text-gray-500'
-                        }`}
-                    >
-                        Giỏ đồ ăn
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('ordered')}
-                        className={`pb-2 ${
-                            activeTab === 'ordered' ? 'border-b-2 border-red-500 font-bold' : 'text-gray-500'
-                        }`}
-                    >
-                        Món đã gọi
-                    </button>
+                    <span className="pb-2 border-b-2 border-red-500 font-bold">Giỏ đồ ăn</span>
                 </div>
 
-                {activeTab === 'cart' ? (
-                    <div>
-                        {loading ? (
-                            <div className="text-center text-gray-500">Đang tải dữ liệu...</div>
-                        ) : items.length === 0 ? (
-                            <div className="text-center text-gray-500">Bạn chưa chọn món ăn nào.</div>
-                        ) : (
-                            <>
-                                {items.map((item) => (
-                                    <div
-                                        key={item.id}
-                                        className="flex items-center border border-red-200 rounded p-2 mb-3"
-                                    >
-                                        <input
-                                            type="checkbox"
-                                            checked={item.checked}
-                                            onChange={() => toggleCheck(item.id)}
-                                            className="mr-2 accent-red-500"
-                                        />
-                                        <img
-                                            src={item.image}
-                                            alt={item.name}
-                                            className="w-16 h-16 object-cover rounded mr-3 border"
-                                        />
-                                        <div className="flex-1">
-                                            <p className="font-semibold">{item.name}</p>
-                                            <div className="flex items-center space-x-2 mt-1">
-                                                <button
-                                                    onClick={() => changeQuantity(item.id, -1)}
-                                                    className="px-2 py-1 border border-red-400 text-red-500 rounded"
-                                                >
-                                                    -
-                                                </button>
-                                                <span className="min-w-[20px] text-center">{item.quantity}</span>
-                                                <button
-                                                    onClick={() => changeQuantity(item.id, 1)}
-                                                    className="px-2 py-1 border border-red-400 text-red-500 rounded"
-                                                >
-                                                    +
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div className="ml-4 font-semibold text-red-500 whitespace-nowrap">
-                                            {(item.price * item.quantity).toLocaleString()}đ
-                                        </div>
+                {loading ? (
+                    <div className="text-center text-gray-500">Đang tải dữ liệu...</div>
+                ) : items.length === 0 ? (
+                    <div className="text-center text-gray-500">Bạn chưa chọn món ăn nào.</div>
+                ) : (
+                    <>
+                        {items.map((item) => (
+                            <div
+                                key={item.id}
+                                className="flex items-center border border-red-200 rounded p-2 mb-3"
+                            >
+                                <img
+                                    src={item.image}
+                                    alt={item.name}
+                                    className="w-16 h-16 object-cover rounded mr-3 border"
+                                />
+                                <div className="flex-1">
+                                    <p className="font-semibold">{item.name}</p>
+                                    <div className="flex items-center space-x-2 mt-1">
+                                        <button
+                                            onClick={() => changeQuantity(item.id, -1)}
+                                            className="px-2 py-1 border border-red-400 text-red-500 rounded"
+                                        >
+                                            -
+                                        </button>
+                                        <span className="min-w-[20px] text-center">{item.quantity}</span>
+                                        <button
+                                            onClick={() => changeQuantity(item.id, 1)}
+                                            className="px-2 py-1 border border-red-400 text-red-500 rounded"
+                                        >
+                                            +
+                                        </button>
                                     </div>
-                                ))}
+                                </div>
+                                <div className="ml-4 font-semibold text-red-500 whitespace-nowrap">
+                                    {(item.price * item.quantity).toLocaleString()}đ
+                                </div>
+                                <button
+                                    className="ml-4 text-red-500 text-xl font-bold hover:opacity-70"
+                                    title="Xóa món"
+                                    onClick={() => handleRemoveItem(item.id)}
+                                >
+                                    ×
+                                </button>
+                            </div>
+                        ))}
 
-                                <div className="flex justify-between items-center mt-4 font-bold">
-                                    <span>Tổng:</span>
+                        {/* Chi tiết thanh toán */}
+                        <div className="mt-6">
+                            <h2 className="font-bold mb-2">Phương thức thanh toán</h2>
+                            <div className="space-y-2">
+                                {paymentMethods.map((pm) => (
+                                    <label key={pm.Ma_phuong_thuc_thanh_toan} className="flex items-center space-x-2">
+                                        <input
+                                            type="radio"
+                                            value={pm.Ma_phuong_thuc_thanh_toan}
+                                            checked={paymentMethod === pm.Ma_phuong_thuc_thanh_toan.toString()}
+                                            onChange={(e) => setPaymentMethod(e.target.value)}
+                                        />
+                                        <span>{pm.Ten_phuong_thuc_thanh_toan}</span>
+                                    </label>
+                                ))}
+                            </div>
+
+                            <div className="mt-4 border-t pt-2 font-semibold">
+                                <div className="flex justify-between">
+                                    <span>Tổng cộng:</span>
                                     <span>{total.toLocaleString()}đ</span>
                                 </div>
-                                <button className="mt-4 w-full py-2 bg-black text-white rounded" onClick={handleConfirmOrder}>
-                                    Xác nhận đặt món
-                                </button>
-                            </>
-                        )}
-                    </div>
-                ) : (
-                    <div className="space-y-6">
-                        {orderedLoading ? (
-                            <div className="text-center text-gray-500">Đang tải dữ liệu...</div>
-                        ) : orderedItems.length === 0 ? (
-                            <div className="text-center text-gray-500">Chưa có món nào đã gọi.</div>
-                        ) : (
-                            <>
-                                {orderedItems.map((item) => (
-                                    <div key={item.id}>
-                                        <div className="flex items-start">
-                                            <div className="w-2/3 flex items-center space-x-2">
-                                                <span className="bg-red-600 text-white text-sm px-2 py-0.5 rounded">
-                                                    {item.quantity}x
-                                                </span>
-                                                <span className="font-semibold">{item.name}</span>
-                                            </div>
-                                            <div className="w-1/6 text-gray-600 whitespace-nowrap">{item.status}</div>
-                                            <div className="w-1/6 text-red-600 font-semibold text-right whitespace-nowrap">
-                                                {item.price.toLocaleString()}đ
-                                            </div>
-                                        </div>
-                                        {item.children && item.children.length > 0 && (
-                                            <div className="mt-2 space-y-1 ml-6">
-                                                {item.children.map((subItem, idx) => (
-                                                    <div key={idx} className="flex items-center text-sm text-gray-700">
-                                                        <span className="bg-gray-200 text-xs px-2 py-0.5 rounded mr-2">1x</span>
-                                                        Combo: {subItem}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
-                                ))}
-                                <div className="flex justify-between items-center mt-6 font-bold">
-                                    <span>Tổng:</span>
-                                    <span>{orderedItems.reduce((sum, item) => sum + item.price * item.quantity, 0).toLocaleString()}đ</span>
-                                </div>
-                                <button className="mt-4 w-full py-2 bg-black text-white rounded">Kết thúc dịch vụ</button>
-                            </>
-                        )}
-                    </div>
+                            </div>
+
+                            <button
+                                className="mt-4 w-full py-2 bg-black text-white rounded"
+                                onClick={handleConfirmOrder}
+                            >
+                                Xác nhận đặt món
+                            </button>
+                        </div>
+                    </>
                 )}
             </div>
+
             <Footer />
         </>
     );

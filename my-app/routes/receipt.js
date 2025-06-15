@@ -3,6 +3,23 @@ const router = express.Router();
 const db = require('../db');
 const verifyToken = require('../middleware/auth.js');
 
+// Helper to recalculate and update Tong_tien and VAT in hoa_don
+async function recalculateAndUpdateTotalAndVAT(ma_hoa_don) {
+  // Calculate total
+  const [rows] = await db.promise().query(
+    `SELECT SUM(ct.So_luong * m.Don_gia) AS tong_tien
+     FROM chi_tiet_hoa_don ct
+     JOIN mon_an m ON ct.Ma_mon_an = m.Ma_mon_an
+     WHERE ct.Ma_hoa_don = ?`,
+    [ma_hoa_don]
+  );
+  const tong_tien = rows[0].tong_tien || 0;
+  const VAT = tong_tien * 0.1; // 10% VAT
+  await db.promise().query(
+    'UPDATE hoa_don SET Tong_tien = ?, VAT = ? WHERE Ma_hoa_don = ?',
+    [tong_tien, VAT, ma_hoa_don]
+  );
+}
 
 router.post('/cart/add', verifyToken, async (req, res) => {
   const { Ma_mon_an, So_luong, Ghi_chu } = req.body;
@@ -40,7 +57,8 @@ router.post('/cart/add', verifyToken, async (req, res) => {
         [ma_hoa_don, Ma_mon_an, So_luong, Ghi_chu || null]
       );
     }
-
+    // Update total and VAT after add
+    await recalculateAndUpdateTotalAndVAT(ma_hoa_don);
     res.json({ message: 'Thêm món vào giỏ hàng thành công' });
   } catch (err) {
     console.error(err);
@@ -80,6 +98,8 @@ router.put('/cart/update', verifyToken, async (req, res) => {
         [ma_hoa_don, Ma_mon_an, So_luong]
       );
     }
+    // Update total and VAT after update
+    await recalculateAndUpdateTotalAndVAT(ma_hoa_don);
     res.json({ message: 'Cập nhật số lượng thành công' });
   } catch (err) {
     console.error(err);
@@ -91,13 +111,16 @@ router.put('/cart/update', verifyToken, async (req, res) => {
 
 router.delete('/cart/remove', verifyToken, async (req, res) => {
   const { Ma_mon_an } = req.body;
-  const ma_khach_hang = req.user.ma_khach_hang;
+  // Support both possible casing from token
+  const ma_khach_hang = req.user.user?.Ma_khach_hang || req.user.Ma_khach_hang || req.user.ma_khach_hang;
+  console.log('[cart/remove] ma_khach_hang:', ma_khach_hang);
 
   try {
     const [hoaDon] = await db.promise().query(
-      'SELECT Ma_hoa_don FROM hoa_don WHERE Ma_khach_hang = ? AND Trang_thai = 0',
+      'SELECT Ma_hoa_don FROM hoa_don WHERE Ma_khach_hang = ? AND Tinh_trang = 0',
       [ma_khach_hang]
     );
+    console.log('[cart/remove] hoaDon:', hoaDon);
 
     if (hoaDon.length === 0) {
       return res.status(400).json({ message: 'Chưa có hóa đơn đang mở' });
@@ -106,10 +129,11 @@ router.delete('/cart/remove', verifyToken, async (req, res) => {
     const ma_hoa_don = hoaDon[0].Ma_hoa_don;
 
     await db.promise().query(
-      'DELETE FROM Chi_tiet_hoa_don WHERE Ma_hoa_don = ? AND Ma_mon_an = ?',
+      'DELETE FROM chi_tiet_hoa_don WHERE Ma_hoa_don = ? AND Ma_mon_an = ?',
       [ma_hoa_don, Ma_mon_an]
     );
-
+    // Update total and VAT after remove
+    await recalculateAndUpdateTotalAndVAT(ma_hoa_don);
     res.json({ message: 'Xóa món khỏi giỏ hàng thành công' });
   } catch (err) {
     console.error(err);
@@ -124,7 +148,7 @@ router.put('/checkout', verifyToken, async (req, res) => {
 
   try {
     const [hoaDon] = await db.promise().query(
-      'SELECT Ma_hoa_don FROM hoa_don WHERE Ma_khach_hang = ? AND Trang_thai = 1',
+      'SELECT Ma_hoa_don FROM hoa_don WHERE Ma_khach_hang = ? AND Tinh_trang = 1',
       [ma_khach_hang]
     );
 
@@ -135,7 +159,7 @@ router.put('/checkout', verifyToken, async (req, res) => {
     const ma_hoa_don = hoaDon[0].Ma_hoa_don;
 
     await db.promise().query(
-      'UPDATE hoa_don SET Trang_thai = 2, Ma_phuong_thuc_thanh_toan = ? WHERE Ma_hoa_don = ?',
+      'UPDATE hoa_don SET Tinh_trang = 2, Ma_phuong_thuc_thanh_toan = ? WHERE Ma_hoa_don = ?',
       [phuong_thuc_thanh_toan, ma_hoa_don]
     );
 
@@ -152,7 +176,7 @@ router.post('/tinh-tien/:maHoaDon', (req, res) => {
   const maHoaDon = req.params.maHoaDon;
 
   const sql = `
-    SELECT SUM(ct.So_luong * m.Gia) AS tong_tien
+    SELECT SUM(ct.So_luong * m.Don_gia) AS tong_tien
     FROM chi_tiet_hoa_don ct
     JOIN mon_an m ON ct.Ma_mon_an = m.Ma_mon_an
     WHERE ct.Ma_hoa_don = ?
@@ -249,6 +273,17 @@ router.put('/confirm-order', verifyToken, async (req, res) => {
       [ma_hoa_don]
     );
     res.json({ message: 'Đã xác nhận đặt món, hóa đơn chuyển sang trạng thái chờ thanh toán.' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Lỗi máy chủ' });
+  }
+});
+
+// API to get all payment methods
+router.get('/payment-methods', async (req, res) => {
+  try {
+    const [rows] = await db.promise().query('SELECT Ma_phuong_thuc_thanh_toan, Ten_phuong_thuc_thanh_toan FROM phuong_thuc_thanh_toan');
+    res.json(rows);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Lỗi máy chủ' });

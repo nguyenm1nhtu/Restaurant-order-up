@@ -1,18 +1,19 @@
 // db.js
-const mysql = require("mysql2");
+const mysql = require('mysql2');
 
 const connection = mysql.createConnection({
-  host: "localhost",
-  user: "root", // tài khoản của bạn
-  database: "nhahang",
+  host: 'localhost',
+  user: 'root',           // tài khoản của bạn
+  database: 'nhahang',
+  password: 'Duc[992299]V',     // mật khẩu của bạn
 });
 
 connection.connect((err) => {
   if (err) {
-    console.error("Lỗi kết nối:", err);
+    console.error('Lỗi kết nối:', err);
     return;
   }
-  console.log("✅ Kết nối MySQL thành công!");
+  console.log('✅ Kết nối MySQL thành công!');
 });
 
 module.exports = connection;

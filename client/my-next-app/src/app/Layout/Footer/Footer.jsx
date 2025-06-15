@@ -6,7 +6,11 @@ export default function Footer() {
             <footer id="footer">
                 <div
                     className="w-full bg-white relative px-[180px] py-[40px]"
-                    style={{ borderTop: '1px solid #e8ebed' }}
+                    style={{ 
+                        borderTop: '1px solid #e8ebed',
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                    }}
                 >
                     <img src="/img/header/logo.png" alt="logo" className="h-[42px] object-contain mb-9" />
 
