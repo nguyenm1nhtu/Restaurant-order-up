@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Header from '@/app/Layout/Header/Header';
 import style from './Profile.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -12,6 +12,33 @@ export default function Profile() {
         phoneNumber: '',
         email: '',
     });
+    const [memberLevel, setMemberLevel] = useState('');
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchProfile = async () => {
+            try {
+                const res = await fetch('http://localhost:3001/khachhang/profile', {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                });
+                if (!res.ok) throw new Error('Failed to fetch user profile');
+                const data = await res.json();
+                setFormData({
+                    fullName: data.Ten_khach_hang || '',
+                    phoneNumber: data.So_dien_thoai || '',
+                    email: data.Email || '',
+                });
+                setMemberLevel(data.Ten_hang_thanh_vien || '');
+            } catch (err) {
+                console.error('Lỗi khi lấy thông tin người dùng:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchProfile();
+    }, []);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -19,9 +46,21 @@ export default function Profile() {
         setFormData((prev) => ({ ...prev, [name]: sanitizedValue }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log('Form submitted:', formData);
+        try {
+            const res = await fetch('http://localhost:3001/khachhang/profile/update', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                    Ten_khach_hang: formData.fullName,
+                    Email: formData.email,
+                }),
+            });
+        } catch (err) {
+            console.error(err);
+        }
     };
 
     const isSubmitDisabled = !formData.fullName.trim() || !formData.phoneNumber.trim();
@@ -90,21 +129,21 @@ export default function Profile() {
 
                     <div className={style.boxTools}>
                         <p className="text-[16px] text-black">Chào bạn trở lại,</p>
-                        <p className="text-[18px] font-semibold text-[var(--primary-color)] mb-6">Đoàn Trung Hiếu</p>
+                        <p className="text-[18px] font-semibold text-[var(--primary-color)] mb-6">{formData.fullName}</p>
                         <p className="text-[16px] text-gray flex gap-[15px] items-center mb-4">
                             <FontAwesomeIcon icon={faPhone} />
                             <span className="font-semibold">Số điện thoại: </span>
-                            <span>01234567890</span>
+                            <span>{formData.phoneNumber}</span>
                         </p>
                         <p className="text-[16px] text-gray flex gap-[15px] items-center mb-4">
                             <FontAwesomeIcon icon={faEnvelope} />
                             <span className="font-semibold">Email: </span>
-                            <span>1110@html.com</span>
+                            <span>{formData.email}</span>
                         </p>
                         <p className="text-[16px] text-gray flex gap-[15px] items-center mb-4">
                             <FontAwesomeIcon icon={faUserTie} />
                             <span className="font-semibold">Thành viên: </span>
-                            <span>SILVER</span>
+                            <span>{memberLevel}</span>
                         </p>
 
                         {/* <div
