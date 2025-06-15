@@ -1,13 +1,16 @@
 .container {
     margin-top: var(--header-height);
-    min-height: calc(100vh - var(--header-height));
+    min-height: 100vh;
+    height: auto;
     width: 100%;
     position: relative;
-    background-color: #fff;
+    background: url('/img/menu/menu_bg.jpg') no-repeat center center;
+    background-size: cover;
+    padding-bottom: 80px;
 }
 
 .overlay {
-    position: absolute;
+    position: relative;
     top: 0;
     left: 0;
     width: 100%;
@@ -19,13 +22,47 @@
 
 .category {
     width: 100%;
-    background-color: white;
-    padding: 1.25rem;
+    background-color: #f4d2d6;
+    padding: 20px 0 27px;
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    border: 1px solid var(--primary-color);
-    border-radius: 5px;
+    border-radius: 10px;
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 20px;
+    gap: 80px;
+}
+
+.categoryItem {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+}
+
+.categoryItem:hover {
+    color: var(--primary-color);
+}
+
+.active {
+    color: var(--primary-color);
+}
+
+.foodItem {
+    background-color: black;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 275px;
+    border-radius: 15px;
+    padding: 1.75rem;
+    gap: 25px;
+    position: relative;
+    cursor: pointer;
+}
+
+.foodItem:hover {
+    transform: scale(1.05);
+    transition: transform 0.3s ease;
 }
