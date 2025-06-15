@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import clsx from 'clsx';
 import Order from '@/app/Order/Order';
@@ -14,6 +13,7 @@ export default function Header() {
     const [loggedIn, setLoggedIn] = useState(false);
     const [loginOpen, setLoginOpen] = useState(false);
     const [guestName, setGuestName] = useState('');
+    const [guestName, setGuestName] = useState('');
     const [bookingOpen, setBookingOpen] = useState(false);
     const router = useRouter();
 
@@ -22,6 +22,21 @@ export default function Header() {
     });
 
     useEffect(() => {
+        fetch('http://localhost:3001/me', {
+            credentials: 'include',
+        })
+            .then((res) => {
+                if (!res.ok) throw new Error('Not authenticated');
+                return res.json();
+            })
+            .then((data) => {
+                setLoggedIn(true);
+                setGuestName(data.user?.Ten_khach_hang || 'Khách hàng');
+            })
+            .catch(() => {
+                setLoggedIn(false);
+                setGuestName('');
+            });
         fetch('http://localhost:3001/me', {
             credentials: 'include',
         })
@@ -93,6 +108,7 @@ export default function Header() {
     const handleBookingConfirm = (bookingData) => {
         console.log('Booking confirmed:', bookingData);
         setBookingOpen(false);
+        setBookingOpen(false);
     };
 
     return (
@@ -113,7 +129,6 @@ export default function Header() {
                             <div className={style.items}>
                                 <Link href="/Cart">Giỏ hàng</Link>
                             </div>
-                            <div className={style.items}>Thanh Toán</div>
 
                             {loggedIn ? (
                                 <div
@@ -145,7 +160,11 @@ export default function Header() {
                                 </button>
                             )}
 
-                            <button className={clsx(style.headerBtn, style.order)} onClick={handleBookingClick}>
+                            <button
+                                className={clsx(style.headerBtn, style.order)}
+                                onClick={handleBookingClick}
+                                disabled={!loggedIn} // Disabled khi chưa đăng nhập
+                            >
                                 ĐẶT BÀN
                             </button>
                         </div>
