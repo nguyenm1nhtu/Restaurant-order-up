@@ -15,7 +15,7 @@ router.get('/monan', (req, res) => {
 
 // Lấy tất cả danh mục món ăn
 router.get('/danhmuc', (req, res) => {
-  db.query('SELECT * FROM danh_muc_mon_an', (err, results) => {
+  db.query('SELECT * FROM danh_muc_mon_an limit 5', (err, results) => {
     if (err) {
       console.error(err);
       return res.status(500).send('Lỗi truy vấn cơ sở dữ liệu');

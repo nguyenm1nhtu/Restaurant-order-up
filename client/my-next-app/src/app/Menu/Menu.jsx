@@ -8,6 +8,7 @@ import Popup from './Popup';
 import style from './Menu.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCircleChevronRight } from '@fortawesome/free-solid-svg-icons';
+import Link from 'next/link';
 
 export default function Menu() {
     const [foodItems, setFoodItems] = useState([]);
@@ -31,9 +32,17 @@ export default function Menu() {
             .then((data) => setFoodItems(data))
             .catch((err) => console.error('Failed to load food items', err));
     }, []);
-    const handleCategoryClick = (category) => {
-        setSelectedCategory(category);
-        console.log('Selected category:', category);
+    const handleCategoryClick = async(category) => {
+        try {
+            console.log('Category clicked:', category)  ;
+            const res = await fetch(`http://localhost:3001/menu/danhmuc/${category.Ma_danh_muc}/monan`);
+            if (!res.ok) throw new Error('Không tìm thấy món ăn');
+            const data = await res.json();
+            setSelectedCategory(category.Ma_danh_muc);
+            setFoodItems(data);
+        } catch (err) {
+            console.error("Lỗi khi lấy thông tin danh mục: ", err);
+        }
     };
 
     const handleFoodClick = async (food) => {
@@ -92,8 +101,8 @@ export default function Menu() {
                         {categories.map((category) => (
                             <div
                                 key={category.Ma_danh_muc}
-                                className={clsx(style.categoryItem, selectedCategory === category.Ten_danh_muc && style.active)}
-                                onClick={() => handleCategoryClick(category.Ten_danh_muc)}
+                                className={clsx(style.categoryItem)}
+                                onClick={() => handleCategoryClick(category)}
                             >
                                 <div className="w-[100px] object-fit">
                                     {/* <img src={category.img} alt={category.name} /> */}
@@ -128,17 +137,17 @@ export default function Menu() {
             </div>
             <Footer />
 
-            <Popup isOpen={!!selectedFood} onClose={closePopup} title={selectedFood?.name}>
+            <Popup isOpen={!!selectedFood} onClose={closePopup} title={selectedFood?.Ten_mon_an}>
                 {selectedFood && (
                     <>
                         <img
                             src={selectedFood.img}
-                            alt={selectedFood.name}
+                            alt={selectedFood.Ten_mon_an}
                             className="w-full h-[150px] object-cover rounded-[15px]"
                         />
-                        <p className="text-white font-semibold text-[20px] text-center mt-5">{selectedFood.name}</p>
+                        <p className="text-white font-semibold text-[20px] text-center mt-5">{selectedFood.Ten_mon_an}</p>
                         <p className="text-[18px] text-[#bfa96d] mx-2 text-center">
-                            <span className="font-semibold">{selectedFood.price}</span> vnđ
+                            <span className="font-semibold">{selectedFood.Don_gia}</span> vnđ
                         </p>
                         <div className="w-full h-[1px] bg-white my-4"></div>
                         {selectedFood.combo && (
@@ -203,7 +212,7 @@ export default function Menu() {
                             className="cursor-pointer px-5 py-2 bg-[var(--primary-color)] text-white rounded-[5px] hover:bg-opacity-80"
                             onClick={goToCart}
                         >
-                            <span className="text-[14px] font-semibold">Đến giỏ hàng</span>
+                            <span className="text-[14px] font-semibold"><Link href="/cart">Đến giỏ hàng</Link></span>
                         </button>
                         <button
                             className="cursor-pointer px-5 py-2 bg-gray-300 text-black rounded-[5px] hover:bg-gray-400"
