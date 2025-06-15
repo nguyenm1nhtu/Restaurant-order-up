@@ -6,7 +6,7 @@ const verifyToken = require("../middleware/auth");
 router.post("/", verifyToken, (req, res) => {
   try {
     console.log("Request received for /bookingTable"); // Log khi nhận request
-    const maKhachHang = req.user.ma_khach_hang;
+    const maKhachHang = req.user.user?.Ma_khach_hang || req.user.Ma_khach_hang;
     const { numberOfPeople, table } = req.body;
 
     console.log("Received data:", { numberOfPeople, table }); // Debug dữ liệu đầu vào
