@@ -2,7 +2,7 @@
 
 Số lượng thành viên: 3
 
-![Trang chủ](client/my-next-app/public/img/demo/demo1.png)
+![Trang chủ](./client/my-next-app/public/img/demo/demo1.png)
 
 ## 🚀 Demo
 
