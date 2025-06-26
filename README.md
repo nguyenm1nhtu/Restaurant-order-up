@@ -2,9 +2,9 @@
 
 Số lượng thành viên: 3
 
-![Trang chủ](./client/my-next-app/public/img/demo/demo1.png)
-
 ## 🚀 Demo
+
+![Trang chủ](./client/my-next-app/public/img/demo/demo1.png)
 
 [👉 Xem bản demo tại đây](https://tenban.github.io/ten-du-an)
 
