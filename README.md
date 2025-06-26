@@ -6,19 +6,22 @@ Số lượng thành viên: 3
 
 ![Trang chủ](./client/my-next-app/public/img/demo/demo1.png)
 
+## 🚀 Đặt bàn
 
-## 📦 Tính năng
+![Trang chủ](./client/my-next-app/public/img/demo/demo1.png)
 
-- ✅ Tính năng 1
-- ✅ Tính năng 2
-- ✅ Tính năng 3
+## 🚀 Thực đơn
 
-## 🛠 Công nghệ sử dụng
+![Trang chủ](./client/my-next-app/public/img/demo/demo1.png)
 
-- ⚛️ React / Vue / Angular / etc.
-- 🎨 TailwindCSS / Bootstrap
-- 🔧 Node.js / Express / MongoDB / etc.
+## 🚀 Đặt món
 
-## 🧑‍💻 Cách cài đặt (Installation)
+![Trang chủ](./client/my-next-app/public/img/demo/demo1.png)
 
-```bash
+## 🚀 Giỏ hàng
+
+![Trang chủ](./client/my-next-app/public/img/demo/demo1.png)
+
+## 🚀 Thông tin tài khoản
+
+![Trang chủ](./client/my-next-app/public/img/demo/demo1.png)
