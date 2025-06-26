@@ -8,20 +8,20 @@ Số lượng thành viên: 3
 
 ## Đặt bàn
 
-![Trang chủ](./client/my-next-app/public/img/demo/demo4.png)
+![Đặt bàn](client/my-next-app/public/img/demo/demo4.png)
 
 ## Thực đơn
 
-![Trang chủ](./client/my-next-app/public/img/demo/demo2.png)
+![Thực đơn](client/my-next-app/public/img/demo/demo2.png)
 
 ## Đặt món
 
-![Trang chủ](./client/my-next-app/public/img/demo/demo3.png)
+![Đặt món](client/my-next-app/public/img/demo/demo3.png)
 
 ## Giỏ hàng
 
-![Trang chủ](./client/my-next-app/public/img/demo/demo5.png)
+![Giỏ hàng](client/my-next-app/public/img/demo/demo5.png)
 
 ## Thông tin tài khoản
 
-![Trang chủ](./client/my-next-app/public/img/demo/demo6.png)
+![Thông tin tài khoản](client/my-next-app/public/img/demo/demo6.png)
