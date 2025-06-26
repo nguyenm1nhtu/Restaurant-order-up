@@ -18,23 +18,18 @@ export default function Menu() {
     const [requestText, setRequestText] = useState('');
     const [quantity, setQuantity] = useState(0);
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);
-    const [isTableBooked, setIsTableBooked] = useState(false);
-    const [showTableRequiredPopup, setShowTableRequiredPopup] = useState(false);
 
     useEffect(() => {
-        // Lấy danh mục
         fetch('http://localhost:3001/menu/danhmuc')
             .then((res) => res.json())
             .then((data) => setCategories(data))
             .catch((err) => console.error('Failed to load categories', err));
 
-        // Lấy danh sách món ăn
         fetch('http://localhost:3001/menu/monan')
             .then((res) => res.json())
             .then((data) => setFoodItems(data))
             .catch((err) => console.error('Failed to load food items', err));
     }, []);
-
     const handleCategoryClick = async (category) => {
         try {
             console.log('Category clicked:', category);
@@ -64,11 +59,6 @@ export default function Menu() {
 
     const handleAddToCart = async () => {
         if (quantity > 0 && selectedFood) {
-            if (!isTableBooked) {
-                setShowTableRequiredPopup(true);
-                return;
-            }
-
             try {
                 const cartItem = {
                     Ma_mon_an: selectedFood.Ma_mon_an,
@@ -121,10 +111,6 @@ export default function Menu() {
         setShowSuccessPopup(false);
     };
 
-    const closeTableRequiredPopup = () => {
-        setShowTableRequiredPopup(false); // Đóng popup thông báo
-    };
-
     return (
         <>
             <Header />
@@ -137,9 +123,7 @@ export default function Menu() {
                                 className={clsx(style.categoryItem)}
                                 onClick={() => handleCategoryClick(category)}
                             >
-                                <div className="w-[100px] object-fit">
-                                    {/* <img src={category.img} alt={category.name} /> */}
-                                </div>
+                                <div className="w-[100px] object-fit"></div>
                                 <span className="font-bold text-[14px] uppercase">{category.Ten_danh_muc}</span>
                             </div>
                         ))}
@@ -262,19 +246,6 @@ export default function Menu() {
                             <span className="text-[14px] font-semibold">Tiếp tục đặt đơn</span>
                         </button>
                     </div>
-                </div>
-            </Popup>
-
-            {/* Popup thông báo cần đặt bàn */}
-            <Popup isOpen={showTableRequiredPopup} onClose={closeTableRequiredPopup}>
-                <div className="text-center">
-                    <p className="text-white text-[16px] font-semibold mb-10">Cần đặt bàn trước khi đặt món!</p>
-                    <button
-                        className="cursor-pointer px-5 py-2 bg-[var(--primary-color)] text-white rounded-[5px] hover:bg-opacity-80"
-                        onClick={closeTableRequiredPopup}
-                    >
-                        <span className="text-[14px] font-semibold">Đóng</span>
-                    </button>
                 </div>
             </Popup>
         </>

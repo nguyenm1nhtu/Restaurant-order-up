@@ -7,11 +7,13 @@ export default function Order({ isOpen, onClose, onConfirm }) {
     const [numberOfPeople, setNumberOfPeople] = useState('');
     const [selectedTables] = useState(['B001', 'B002', 'B003', 'B004', 'B005']);
     const [activeTable, setActiveTable] = useState('');
+    const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
     useEffect(() => {
         if (!isOpen) {
             setNumberOfPeople('');
             setActiveTable('');
+            setShowSuccessPopup(false);
         }
     }, [isOpen]);
 
@@ -35,7 +37,7 @@ export default function Order({ isOpen, onClose, onConfirm }) {
                 console.log('API Response:', data);
                 if (res.ok && data.status === 'success') {
                     onConfirm(data);
-                    onClose();
+                    setShowSuccessPopup(true);
                 } else {
                     alert(data.message || 'Đặt bàn thất bại!');
                 }
@@ -53,48 +55,68 @@ export default function Order({ isOpen, onClose, onConfirm }) {
         setActiveTable((prev) => (prev === table ? '' : table));
     };
 
+    const closeSuccessPopup = () => {
+        setShowSuccessPopup(false);
+        onClose();
+    };
+
     return (
-        <Popup isOpen={isOpen} onClose={onClose} title="Đặt bàn">
-            <div className="">
-                <div className="my-4">
-                    <label className="block text-white text-[14px] font-semibold mb-2">Số người</label>
-                    <input
-                        type="number"
-                        className="w-full p-2 border border-gray-300 rounded-[5px] text-[12px] bg-white text-black mb-4"
-                        value={numberOfPeople}
-                        onChange={(e) => setNumberOfPeople(e.target.value)}
-                        min="1"
-                        placeholder="Nhập số người"
-                    />
-                </div>
-
-                <div className="my-4">
-                    <div className="block text-white text-[14px] font-semibold mb-2">Chọn số bàn</div>
-                    <div className="flex items-center gap-[10px] flex-wrap">
-                        {selectedTables.map((table) => (
-                            <div
-                                key={table}
-                                className={`font-semibold flex items-center justify-center w-[47px] h-[45px] p-3 border border-[var(--primary-color)] text-center rounded-[5px] text-[12px] cursor-pointer mb-4 ${
-                                    activeTable === table
-                                        ? 'bg-[var(--primary-color)] text-white'
-                                        : 'text-white hover:bg-[var(--primary-color)] hover:text-white'
-                                }`}
-                                onClick={() => handleTableClick(table)}
-                            >
-                                {table}
-                            </div>
-                        ))}
+        <>
+            <Popup isOpen={isOpen} onClose={onClose} title="Đặt bàn">
+                <div className="">
+                    <div className="my-4">
+                        <label className="block text-white text-[14px] font-semibold mb-2">Số người</label>
+                        <input
+                            type="number"
+                            className="w-full p-2 border border-gray-300 rounded-[5px] text-[12px] bg-white text-black mb-4"
+                            value={numberOfPeople}
+                            onChange={(e) => setNumberOfPeople(e.target.value)}
+                            min="1"
+                            placeholder="Nhập số người"
+                        />
                     </div>
-                </div>
 
-                <button
-                    className="w-full cursor-pointer mt-4 px-5 py-3 bg-[var(--primary-color)] text-white rounded-[5px] hover:bg-opacity-80 disabled:bg-gray-300 disabled:cursor-not-allowed"
-                    onClick={handleConfirm}
-                    disabled={!activeTable || !numberOfPeople || parseInt(numberOfPeople) <= 0}
-                >
-                    <span className="text-[14px] font-semibold">Xác nhận đặt bàn</span>
-                </button>
-            </div>
-        </Popup>
+                    <div className="my-4">
+                        <div className="block text-white text-[16px] font-semibold mb-2">Chọn số bàn</div>
+                        <div className="flex items-center gap-[10px] flex-wrap">
+                            {selectedTables.map((table) => (
+                                <div
+                                    key={table}
+                                    className={`font-semibold flex items-center justify-center w-[47px] h-[45px] p-3 border border-[var(--primary-color)] text-center rounded-[5px] text-[12px] cursor-pointer mb-4 ${
+                                        activeTable === table
+                                            ? 'bg-[var(--primary-color)] text-white'
+                                            : 'text-white hover:bg-[var(--primary-color)] hover:text-white'
+                                    }`}
+                                    onClick={() => handleTableClick(table)}
+                                >
+                                    {table}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <button
+                        className="w-full cursor-pointer mt-4 px-5 py-3 bg-[var(--primary-color)] text-white rounded-[5px] hover:bg-opacity-80 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                        onClick={handleConfirm}
+                        disabled={!activeTable || !numberOfPeople || parseInt(numberOfPeople) <= 0}
+                    >
+                        <span className="text-[14px] font-semibold">Xác nhận đặt bàn</span>
+                    </button>
+                </div>
+            </Popup>
+
+            {/* Popup thành công */}
+            <Popup isOpen={showSuccessPopup} onClose={closeSuccessPopup}>
+                <div className="text-center">
+                    <p className="text-white text-[16px] font-semibold mb-10">Đặt bàn thành công!</p>
+                    <button
+                        className="cursor-pointer px-5 py-2 bg-[var(--primary-color)] text-white rounded-[5px] hover:bg-opacity-80"
+                        onClick={closeSuccessPopup}
+                    >
+                        <span className="text-[14px] font-semibold">Đóng</span>
+                    </button>
+                </div>
+            </Popup>
+        </>
     );
 }

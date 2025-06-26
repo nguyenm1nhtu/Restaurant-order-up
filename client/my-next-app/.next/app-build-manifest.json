@@ -11,17 +11,23 @@
       "static/css/app/Menu/page.css",
       "static/chunks/app/Menu/page.js"
     ],
+    "/Cart/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/Cart/page.css",
+      "static/chunks/app/Cart/page.js"
+    ],
     "/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/css/app/page.css",
       "static/chunks/app/page.js"
     ],
-    "/Cart/page": [
+    "/Profile/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/css/app/Cart/page.css",
-      "static/chunks/app/Cart/page.js"
+      "static/css/app/Profile/page.css",
+      "static/chunks/app/Profile/page.js"
     ]
   }
 }
