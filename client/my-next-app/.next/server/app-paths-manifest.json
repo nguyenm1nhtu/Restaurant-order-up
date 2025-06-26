@@ -1,0 +1,5 @@
+{
+  "/Menu/page": "app/Menu/page.js",
+  "/Cart/page": "app/Cart/page.js",
+  "/page": "app/page.js"
+}
