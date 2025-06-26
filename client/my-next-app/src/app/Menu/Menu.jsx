@@ -18,6 +18,8 @@ export default function Menu() {
     const [requestText, setRequestText] = useState('');
     const [quantity, setQuantity] = useState(0);
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+    const [isTableBooked, setIsTableBooked] = useState(false);
+    const [showTableRequiredPopup, setShowTableRequiredPopup] = useState(false);
 
     useEffect(() => {
         // Lấy danh mục
@@ -32,16 +34,17 @@ export default function Menu() {
             .then((data) => setFoodItems(data))
             .catch((err) => console.error('Failed to load food items', err));
     }, []);
-    const handleCategoryClick = async(category) => {
+
+    const handleCategoryClick = async (category) => {
         try {
-            console.log('Category clicked:', category)  ;
+            console.log('Category clicked:', category);
             const res = await fetch(`http://localhost:3001/menu/danhmuc/${category.Ma_danh_muc}/monan`);
             if (!res.ok) throw new Error('Không tìm thấy món ăn');
             const data = await res.json();
             setSelectedCategory(category.Ma_danh_muc);
             setFoodItems(data);
         } catch (err) {
-            console.error("Lỗi khi lấy thông tin danh mục: ", err);
+            console.error('Lỗi khi lấy thông tin danh mục: ', err);
         }
     };
 
@@ -55,12 +58,17 @@ export default function Menu() {
             setRequestText('');
             setQuantity(0);
         } catch (err) {
-            console.error("Lỗi khi lấy thông tin món ăn: ", err);
+            console.error('Lỗi khi lấy thông tin món ăn: ', err);
         }
     };
 
     const handleAddToCart = async () => {
         if (quantity > 0 && selectedFood) {
+            if (!isTableBooked) {
+                setShowTableRequiredPopup(true);
+                return;
+            }
+
             try {
                 const cartItem = {
                     Ma_mon_an: selectedFood.Ma_mon_an,
@@ -113,6 +121,10 @@ export default function Menu() {
         setShowSuccessPopup(false);
     };
 
+    const closeTableRequiredPopup = () => {
+        setShowTableRequiredPopup(false); // Đóng popup thông báo
+    };
+
     return (
         <>
             <Header />
@@ -136,10 +148,10 @@ export default function Menu() {
                     <div className="w-full mt-[60px] flex flex-wrap gap-[20px] mr-[-20px]">
                         {foodItems.map((item) => (
                             <div key={item.Ma_mon_an} className={style.foodItem} onClick={() => handleFoodClick(item)}>
-                                <img 
-                                    src={item.Hinh_anh ? `/img/monan/${item.Hinh_anh}` : '/placeholder.svg'} 
-                                    alt={item.Ten_mon_an} 
-                                    className="object-fit rounded-[15px]" 
+                                <img
+                                    src={item.Hinh_anh ? `/img/monan/${item.Hinh_anh}` : '/placeholder.svg'}
+                                    alt={item.Ten_mon_an}
+                                    className="object-fit rounded-[15px] h-[250px]"
                                 />
                                 <div className="flex flex-col text-white w-full">
                                     <p className="text-[20px] font-semibold">{item.Ten_mon_an}</p>
@@ -170,7 +182,9 @@ export default function Menu() {
                             alt={selectedFood.Ten_mon_an}
                             className="w-full h-[150px] object-cover rounded-[15px]"
                         />
-                        <p className="text-white font-semibold text-[20px] text-center mt-5">{selectedFood.Ten_mon_an}</p>
+                        <p className="text-white font-semibold text-[20px] text-center mt-5">
+                            {selectedFood.Ten_mon_an}
+                        </p>
                         <p className="text-[18px] text-[#bfa96d] mx-2 text-center">
                             <span className="font-semibold">{selectedFood.Don_gia}</span> vnđ
                         </p>
@@ -237,7 +251,9 @@ export default function Menu() {
                             className="cursor-pointer px-5 py-2 bg-[var(--primary-color)] text-white rounded-[5px] hover:bg-opacity-80"
                             onClick={goToCart}
                         >
-                            <span className="text-[14px] font-semibold"><Link href="/Cart">Đến giỏ hàng</Link></span>
+                            <span className="text-[14px] font-semibold">
+                                <Link href="/Cart">Đến giỏ hàng</Link>
+                            </span>
                         </button>
                         <button
                             className="cursor-pointer px-5 py-2 bg-gray-300 text-black rounded-[5px] hover:bg-gray-400"
@@ -246,6 +262,19 @@ export default function Menu() {
                             <span className="text-[14px] font-semibold">Tiếp tục đặt đơn</span>
                         </button>
                     </div>
+                </div>
+            </Popup>
+
+            {/* Popup thông báo cần đặt bàn */}
+            <Popup isOpen={showTableRequiredPopup} onClose={closeTableRequiredPopup}>
+                <div className="text-center">
+                    <p className="text-white text-[16px] font-semibold mb-10">Cần đặt bàn trước khi đặt món!</p>
+                    <button
+                        className="cursor-pointer px-5 py-2 bg-[var(--primary-color)] text-white rounded-[5px] hover:bg-opacity-80"
+                        onClick={closeTableRequiredPopup}
+                    >
+                        <span className="text-[14px] font-semibold">Đóng</span>
+                    </button>
                 </div>
             </Popup>
         </>

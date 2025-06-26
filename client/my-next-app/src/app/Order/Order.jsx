@@ -16,7 +16,7 @@ export default function Order({ isOpen, onClose, onConfirm }) {
     }, [isOpen]);
 
     const handleConfirm = async () => {
-        console.log('handleConfirm called', { activeTable, numberOfPeople }); // Debug
+        console.log('handleConfirm called', { activeTable, numberOfPeople });
         if (activeTable && numberOfPeople && parseInt(numberOfPeople) > 0) {
             try {
                 const res = await fetch('http://localhost:3001/bookingTable', {
@@ -32,7 +32,7 @@ export default function Order({ isOpen, onClose, onConfirm }) {
                 });
 
                 const data = await res.json();
-                console.log('API Response:', data); // Debug response
+                console.log('API Response:', data);
                 if (res.ok && data.status === 'success') {
                     onConfirm(data);
                     onClose();
@@ -49,7 +49,7 @@ export default function Order({ isOpen, onClose, onConfirm }) {
     };
 
     const handleTableClick = (table) => {
-        console.log('handleTableClick called', table); // Debug
+        console.log('handleTableClick called', table);
         setActiveTable((prev) => (prev === table ? '' : table));
     };
 
